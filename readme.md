@@ -1,36 +1,114 @@
-backend:
+# Home Mangement (Apache - Python3 - Flask - Vite - Vue.js)
 
-create venv for development:
+## Development
+
+### Backend
+Create a virtual environment
+
+```bash
 python -m venv venv
+```
+Activate virtual environment for Windows:
 
-create venv for production or development:
-virtualenv venv
-
-activate venv:
-
-windows:
+```bash
 Set-ExecutionPolicy Unrestricted -Scope Process
 venv/Scripts/activate.ps1
-
-linux:
+```
+Activate virtual environment for Linux:
+```bash
 source venv/bin/activate
+```
 
-deactivate venv:
+If you want to deactivate virtual environment
+```bash
 deactivate
+```
 
-install dependencies:
+Then install dependencies after activating virtual environment:
+```bash
 pip install -r requirements.txt
+```
 
-rewrite dependencies:
+If you want to rewrite dependencies:
+```bash
 pip freeze > requirements.txt
+```
 
-run:
+Run development after installing dependencies:
+```bash
 python app.py
+```
 
-frontend:
+### Frontend
+Install dependencies:
+```bash
+npm install
+```
 
-install dependencies:
-npm i
-
-run:
+Run development:
+```bash
 npm run dev
+```
+
+### Run Development
+Open browser then go to http://localhost:5173
+
+## Production
+Before anything else
+1. Use Ubuntu OS for the server
+2. Apache installed
+   ```bash
+   sudo apt-get install apache2
+   ```
+3. WSGI mod for python3 installed
+   ```bash
+   sudo apt-get install libapache2-mod-wsgi-py3
+   sudo a2enmod wsgi
+   ```
+4. Virtual environment
+   ```bash
+   sudo apt-get install virtualenv
+   ```
+
+
+Then:
+1. Set the directory
+   ```bash
+   cd /var/www/<your-repository>
+   ```
+2. Create a virtual environment in your directory
+   ```bash
+   virtualenv venv
+   ```
+3. Acitvate the virtual environment
+   ```bash
+   source venv/bin/activate
+   ```
+4. install requirement
+   ```bash
+   pip install -r requirments.txt
+   ```
+5. deactivate environment
+   ```bash
+   deactivate
+   ```
+6. install and build
+   ```bash
+   npm install
+   npm run build
+   ```
+7. Copy `home-management.conf` and paste it to `/etc/apache2/sites-available`
+8. Then enable it by
+   ```bash
+   sudo a2ensite home-management.conf
+   ```
+9. Restart Apache
+   ```bash
+   sudo service apache2 restart
+   ```
+   or
+
+   ```bash
+   sudo systemctl apache2 reload
+   ```
+10. You're all setup
