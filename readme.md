@@ -1,7 +1,10 @@
 backend:
 
-create venv:
+create venv for development:
 python -m venv venv
+
+create venv for production or development:
+virtualenv venv
 
 activate venv:
 

@@ -84,3 +84,45 @@
 [Tue Jul 30 13:09:38.491862 2024] [wsgi:error] [pid 12725:tid 12734] [remote ::1:56296]     deactivate () {
 [Tue Jul 30 13:09:38.492008 2024] [wsgi:error] [pid 12725:tid 12734] [remote ::1:56296]                   ^
 [Tue Jul 30 13:09:38.492108 2024] [wsgi:error] [pid 12725:tid 12734] [remote ::1:56296] SyntaxError: invalid syntax
+[Tue Jul 30 13:19:25.706458 2024] [wsgi:error] [pid 13132:tid 13137] [remote ::1:53952] mod_wsgi (pid=13132): Failed to exec Python script file '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:19:25.706846 2024] [wsgi:error] [pid 13132:tid 13137] [remote ::1:53952] mod_wsgi (pid=13132): Exception occurred processing WSGI script '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:19:25.825563 2024] [wsgi:error] [pid 13132:tid 13137] [remote ::1:53952] Traceback (most recent call last):
+[Tue Jul 30 13:19:25.889525 2024] [wsgi:error] [pid 13132:tid 13137] [remote ::1:53952]   File "/var/www/home-management/app.wsgi", line 5, in <module>
+[Tue Jul 30 13:19:25.889759 2024] [wsgi:error] [pid 13132:tid 13137] [remote ::1:53952]     with open(activate_this) as file_:
+[Tue Jul 30 13:19:25.889793 2024] [wsgi:error] [pid 13132:tid 13137] [remote ::1:53952]          ^^^^^^^^^^^^^^^^^^^
+[Tue Jul 30 13:19:25.890251 2024] [wsgi:error] [pid 13132:tid 13137] [remote ::1:53952] FileNotFoundError: [Errno 2] No such file or directory: '/var/www/home-management/venv/bin/activate_this.py'
+[Tue Jul 30 13:19:26.133242 2024] [wsgi:error] [pid 13132:tid 13143] [remote ::1:53960] mod_wsgi (pid=13132): Failed to exec Python script file '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:19:26.133784 2024] [wsgi:error] [pid 13132:tid 13143] [remote ::1:53960] mod_wsgi (pid=13132): Exception occurred processing WSGI script '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:19:26.135175 2024] [wsgi:error] [pid 13132:tid 13143] [remote ::1:53960] Traceback (most recent call last):
+[Tue Jul 30 13:19:26.138447 2024] [wsgi:error] [pid 13132:tid 13143] [remote ::1:53960]   File "/var/www/home-management/app.wsgi", line 5, in <module>
+[Tue Jul 30 13:19:26.138672 2024] [wsgi:error] [pid 13132:tid 13143] [remote ::1:53960]     with open(activate_this) as file_:
+[Tue Jul 30 13:19:26.138703 2024] [wsgi:error] [pid 13132:tid 13143] [remote ::1:53960]          ^^^^^^^^^^^^^^^^^^^
+[Tue Jul 30 13:19:26.139242 2024] [wsgi:error] [pid 13132:tid 13143] [remote ::1:53960] FileNotFoundError: [Errno 2] No such file or directory: '/var/www/home-management/venv/bin/activate_this.py'
+[Tue Jul 30 13:19:27.470414 2024] [wsgi:error] [pid 13132:tid 13137] [remote ::1:36746] mod_wsgi (pid=13132): Failed to exec Python script file '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:19:27.470891 2024] [wsgi:error] [pid 13132:tid 13137] [remote ::1:36746] mod_wsgi (pid=13132): Exception occurred processing WSGI script '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:19:27.472155 2024] [wsgi:error] [pid 13132:tid 13137] [remote ::1:36746] Traceback (most recent call last):
+[Tue Jul 30 13:19:27.473661 2024] [wsgi:error] [pid 13132:tid 13137] [remote ::1:36746]   File "/var/www/home-management/app.wsgi", line 5, in <module>
+[Tue Jul 30 13:19:27.473924 2024] [wsgi:error] [pid 13132:tid 13137] [remote ::1:36746]     with open(activate_this) as file_:
+[Tue Jul 30 13:19:27.473953 2024] [wsgi:error] [pid 13132:tid 13137] [remote ::1:36746]          ^^^^^^^^^^^^^^^^^^^
+[Tue Jul 30 13:19:27.474212 2024] [wsgi:error] [pid 13132:tid 13137] [remote ::1:36746] FileNotFoundError: [Errno 2] No such file or directory: '/var/www/home-management/venv/bin/activate_this.py'
+[Tue Jul 30 13:19:27.728861 2024] [wsgi:error] [pid 13132:tid 13143] [remote ::1:36750] mod_wsgi (pid=13132): Failed to exec Python script file '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:19:27.729194 2024] [wsgi:error] [pid 13132:tid 13143] [remote ::1:36750] mod_wsgi (pid=13132): Exception occurred processing WSGI script '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:19:27.730657 2024] [wsgi:error] [pid 13132:tid 13143] [remote ::1:36750] Traceback (most recent call last):
+[Tue Jul 30 13:19:27.731908 2024] [wsgi:error] [pid 13132:tid 13143] [remote ::1:36750]   File "/var/www/home-management/app.wsgi", line 5, in <module>
+[Tue Jul 30 13:19:27.732037 2024] [wsgi:error] [pid 13132:tid 13143] [remote ::1:36750]     with open(activate_this) as file_:
+[Tue Jul 30 13:19:27.732063 2024] [wsgi:error] [pid 13132:tid 13143] [remote ::1:36750]          ^^^^^^^^^^^^^^^^^^^
+[Tue Jul 30 13:19:27.732286 2024] [wsgi:error] [pid 13132:tid 13143] [remote ::1:36750] FileNotFoundError: [Errno 2] No such file or directory: '/var/www/home-management/venv/bin/activate_this.py'
+[Tue Jul 30 13:19:30.232358 2024] [wsgi:error] [pid 13132:tid 13137] [remote ::1:36756] mod_wsgi (pid=13132): Failed to exec Python script file '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:19:30.232974 2024] [wsgi:error] [pid 13132:tid 13137] [remote ::1:36756] mod_wsgi (pid=13132): Exception occurred processing WSGI script '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:19:30.234166 2024] [wsgi:error] [pid 13132:tid 13137] [remote ::1:36756] Traceback (most recent call last):
+[Tue Jul 30 13:19:30.235422 2024] [wsgi:error] [pid 13132:tid 13137] [remote ::1:36756]   File "/var/www/home-management/app.wsgi", line 5, in <module>
+[Tue Jul 30 13:19:30.235521 2024] [wsgi:error] [pid 13132:tid 13137] [remote ::1:36756]     with open(activate_this) as file_:
+[Tue Jul 30 13:19:30.235546 2024] [wsgi:error] [pid 13132:tid 13137] [remote ::1:36756]          ^^^^^^^^^^^^^^^^^^^
+[Tue Jul 30 13:19:30.235747 2024] [wsgi:error] [pid 13132:tid 13137] [remote ::1:36756] FileNotFoundError: [Errno 2] No such file or directory: '/var/www/home-management/venv/bin/activate_this.py'
+[Tue Jul 30 13:19:30.470232 2024] [wsgi:error] [pid 13132:tid 13143] [remote ::1:36762] mod_wsgi (pid=13132): Failed to exec Python script file '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:19:30.470823 2024] [wsgi:error] [pid 13132:tid 13143] [remote ::1:36762] mod_wsgi (pid=13132): Exception occurred processing WSGI script '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:19:30.472511 2024] [wsgi:error] [pid 13132:tid 13143] [remote ::1:36762] Traceback (most recent call last):
+[Tue Jul 30 13:19:30.474020 2024] [wsgi:error] [pid 13132:tid 13143] [remote ::1:36762]   File "/var/www/home-management/app.wsgi", line 5, in <module>
+[Tue Jul 30 13:19:30.474243 2024] [wsgi:error] [pid 13132:tid 13143] [remote ::1:36762]     with open(activate_this) as file_:
+[Tue Jul 30 13:19:30.474272 2024] [wsgi:error] [pid 13132:tid 13143] [remote ::1:36762]          ^^^^^^^^^^^^^^^^^^^
+[Tue Jul 30 13:19:30.474531 2024] [wsgi:error] [pid 13132:tid 13143] [remote ::1:36762] FileNotFoundError: [Errno 2] No such file or directory: '/var/www/home-management/venv/bin/activate_this.py'
