@@ -13,7 +13,6 @@ export default defineConfig({
       "/api": {
         target: "http://localhost:5000",
         changeOrigin: true,
-        // rewrite: (path) => path.replace(/^\/api/, "api"),
       },
     },
   },
@@ -24,9 +23,6 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      input: {
-        app: "src/index.html",
-      },
       output: {
         entryFileNames: `assets/bundle.js`,
         chunkFileNames: `assets/[name]-[hash].js`,
@@ -34,5 +30,4 @@ export default defineConfig({
       },
     },
   },
-  base: "/static",
 });
