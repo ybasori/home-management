@@ -1,0 +1,86 @@
+[Tue Jul 30 13:02:43.361817 2024] [wsgi:error] [pid 12078:tid 12083] [remote ::1:53948] mod_wsgi (pid=12078): Failed to exec Python script file '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:02:43.362780 2024] [wsgi:error] [pid 12078:tid 12083] [remote ::1:53948] mod_wsgi (pid=12078): Exception occurred processing WSGI script '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:02:43.558701 2024] [wsgi:error] [pid 12078:tid 12083] [remote ::1:53948] Traceback (most recent call last):
+[Tue Jul 30 13:02:43.615249 2024] [wsgi:error] [pid 12078:tid 12083] [remote ::1:53948]   File "/var/www/home-management/app.wsgi", line 6, in <module>
+[Tue Jul 30 13:02:43.615399 2024] [wsgi:error] [pid 12078:tid 12083] [remote ::1:53948]     exec(file.read(), dict(__file__=activate_this))
+[Tue Jul 30 13:02:43.615426 2024] [wsgi:error] [pid 12078:tid 12083] [remote ::1:53948]          ^^^^
+[Tue Jul 30 13:02:43.615605 2024] [wsgi:error] [pid 12078:tid 12083] [remote ::1:53948] NameError: name 'file' is not defined
+[Tue Jul 30 13:02:44.160311 2024] [wsgi:error] [pid 12078:tid 12091] [remote ::1:53964] mod_wsgi (pid=12078): Failed to exec Python script file '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:02:44.160971 2024] [wsgi:error] [pid 12078:tid 12091] [remote ::1:53964] mod_wsgi (pid=12078): Exception occurred processing WSGI script '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:02:44.162321 2024] [wsgi:error] [pid 12078:tid 12091] [remote ::1:53964] Traceback (most recent call last):
+[Tue Jul 30 13:02:44.163817 2024] [wsgi:error] [pid 12078:tid 12091] [remote ::1:53964]   File "/var/www/home-management/app.wsgi", line 6, in <module>
+[Tue Jul 30 13:02:44.163950 2024] [wsgi:error] [pid 12078:tid 12091] [remote ::1:53964]     exec(file.read(), dict(__file__=activate_this))
+[Tue Jul 30 13:02:44.163977 2024] [wsgi:error] [pid 12078:tid 12091] [remote ::1:53964]          ^^^^
+[Tue Jul 30 13:02:44.164280 2024] [wsgi:error] [pid 12078:tid 12091] [remote ::1:53964] NameError: name 'file' is not defined
+[Tue Jul 30 13:04:34.737547 2024] [wsgi:error] [pid 12433:tid 12438] [remote ::1:43498] mod_wsgi (pid=12433): Failed to exec Python script file '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:04:34.738002 2024] [wsgi:error] [pid 12433:tid 12438] [remote ::1:43498] mod_wsgi (pid=12433): Exception occurred processing WSGI script '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:04:34.856158 2024] [wsgi:error] [pid 12433:tid 12438] [remote ::1:43498] Traceback (most recent call last):
+[Tue Jul 30 13:04:34.913425 2024] [wsgi:error] [pid 12433:tid 12438] [remote ::1:43498]   File "/var/www/home-management/app.wsgi", line 6, in <module>
+[Tue Jul 30 13:04:34.913673 2024] [wsgi:error] [pid 12433:tid 12438] [remote ::1:43498]     exec(file.read(), dict(__file__=activate_this))
+[Tue Jul 30 13:04:34.914073 2024] [wsgi:error] [pid 12433:tid 12438] [remote ::1:43498]   File "<string>", line 4
+[Tue Jul 30 13:04:34.914330 2024] [wsgi:error] [pid 12433:tid 12438] [remote ::1:43498]     deactivate () {
+[Tue Jul 30 13:04:34.914615 2024] [wsgi:error] [pid 12433:tid 12438] [remote ::1:43498]                   ^
+[Tue Jul 30 13:04:34.914776 2024] [wsgi:error] [pid 12433:tid 12438] [remote ::1:43498] SyntaxError: invalid syntax
+[Tue Jul 30 13:04:35.143566 2024] [wsgi:error] [pid 12433:tid 12445] [remote ::1:43504] mod_wsgi (pid=12433): Failed to exec Python script file '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:04:35.144010 2024] [wsgi:error] [pid 12433:tid 12445] [remote ::1:43504] mod_wsgi (pid=12433): Exception occurred processing WSGI script '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:04:35.146210 2024] [wsgi:error] [pid 12433:tid 12445] [remote ::1:43504] Traceback (most recent call last):
+[Tue Jul 30 13:04:35.148919 2024] [wsgi:error] [pid 12433:tid 12445] [remote ::1:43504]   File "/var/www/home-management/app.wsgi", line 6, in <module>
+[Tue Jul 30 13:04:35.149113 2024] [wsgi:error] [pid 12433:tid 12445] [remote ::1:43504]     exec(file.read(), dict(__file__=activate_this))
+[Tue Jul 30 13:04:35.149393 2024] [wsgi:error] [pid 12433:tid 12445] [remote ::1:43504]   File "<string>", line 4
+[Tue Jul 30 13:04:35.149656 2024] [wsgi:error] [pid 12433:tid 12445] [remote ::1:43504]     deactivate () {
+[Tue Jul 30 13:04:35.149895 2024] [wsgi:error] [pid 12433:tid 12445] [remote ::1:43504]                   ^
+[Tue Jul 30 13:04:35.150003 2024] [wsgi:error] [pid 12433:tid 12445] [remote ::1:43504] SyntaxError: invalid syntax
+[Tue Jul 30 13:08:48.937102 2024] [wsgi:error] [pid 12632:tid 12637] [remote ::1:46956] mod_wsgi (pid=12632): Failed to exec Python script file '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:08:48.939344 2024] [wsgi:error] [pid 12632:tid 12637] [remote ::1:46956] mod_wsgi (pid=12632): Exception occurred processing WSGI script '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:08:49.087908 2024] [wsgi:error] [pid 12632:tid 12637] [remote ::1:46956] Traceback (most recent call last):
+[Tue Jul 30 13:08:49.144067 2024] [wsgi:error] [pid 12632:tid 12637] [remote ::1:46956]   File "/var/www/home-management/app.wsgi", line 6, in <module>
+[Tue Jul 30 13:08:49.144225 2024] [wsgi:error] [pid 12632:tid 12637] [remote ::1:46956]     exec(file_.read(), dict(__file__=activate_this))
+[Tue Jul 30 13:08:49.144425 2024] [wsgi:error] [pid 12632:tid 12637] [remote ::1:46956]   File "<string>", line 4
+[Tue Jul 30 13:08:49.144571 2024] [wsgi:error] [pid 12632:tid 12637] [remote ::1:46956]     deactivate () {
+[Tue Jul 30 13:08:49.144815 2024] [wsgi:error] [pid 12632:tid 12637] [remote ::1:46956]                   ^
+[Tue Jul 30 13:08:49.144934 2024] [wsgi:error] [pid 12632:tid 12637] [remote ::1:46956] SyntaxError: invalid syntax
+[Tue Jul 30 13:08:49.406275 2024] [wsgi:error] [pid 12632:tid 12645] [remote ::1:46970] mod_wsgi (pid=12632): Failed to exec Python script file '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:08:49.406723 2024] [wsgi:error] [pid 12632:tid 12645] [remote ::1:46970] mod_wsgi (pid=12632): Exception occurred processing WSGI script '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:08:49.409973 2024] [wsgi:error] [pid 12632:tid 12645] [remote ::1:46970] Traceback (most recent call last):
+[Tue Jul 30 13:08:49.413211 2024] [wsgi:error] [pid 12632:tid 12645] [remote ::1:46970]   File "/var/www/home-management/app.wsgi", line 6, in <module>
+[Tue Jul 30 13:08:49.413385 2024] [wsgi:error] [pid 12632:tid 12645] [remote ::1:46970]     exec(file_.read(), dict(__file__=activate_this))
+[Tue Jul 30 13:08:49.413640 2024] [wsgi:error] [pid 12632:tid 12645] [remote ::1:46970]   File "<string>", line 4
+[Tue Jul 30 13:08:49.413782 2024] [wsgi:error] [pid 12632:tid 12645] [remote ::1:46970]     deactivate () {
+[Tue Jul 30 13:08:49.414052 2024] [wsgi:error] [pid 12632:tid 12645] [remote ::1:46970]                   ^
+[Tue Jul 30 13:08:49.414169 2024] [wsgi:error] [pid 12632:tid 12645] [remote ::1:46970] SyntaxError: invalid syntax
+[Tue Jul 30 13:09:36.580997 2024] [wsgi:error] [pid 12725:tid 12730] [remote ::1:34142] mod_wsgi (pid=12725): Failed to exec Python script file '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:09:36.581510 2024] [wsgi:error] [pid 12725:tid 12730] [remote ::1:34142] mod_wsgi (pid=12725): Exception occurred processing WSGI script '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:09:36.690229 2024] [wsgi:error] [pid 12725:tid 12730] [remote ::1:34142] Traceback (most recent call last):
+[Tue Jul 30 13:09:36.754524 2024] [wsgi:error] [pid 12725:tid 12730] [remote ::1:34142]   File "/var/www/home-management/app.wsgi", line 6, in <module>
+[Tue Jul 30 13:09:36.754805 2024] [wsgi:error] [pid 12725:tid 12730] [remote ::1:34142]     exec(file_.read(), dict(__file__=activate_this))
+[Tue Jul 30 13:09:36.755299 2024] [wsgi:error] [pid 12725:tid 12730] [remote ::1:34142]   File "<string>", line 4
+[Tue Jul 30 13:09:36.755625 2024] [wsgi:error] [pid 12725:tid 12730] [remote ::1:34142]     deactivate () {
+[Tue Jul 30 13:09:36.756044 2024] [wsgi:error] [pid 12725:tid 12730] [remote ::1:34142]                   ^
+[Tue Jul 30 13:09:36.756284 2024] [wsgi:error] [pid 12725:tid 12730] [remote ::1:34142] SyntaxError: invalid syntax
+[Tue Jul 30 13:09:36.978277 2024] [wsgi:error] [pid 12725:tid 12734] [remote ::1:56274] mod_wsgi (pid=12725): Failed to exec Python script file '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:09:36.978952 2024] [wsgi:error] [pid 12725:tid 12734] [remote ::1:56274] mod_wsgi (pid=12725): Exception occurred processing WSGI script '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:09:36.980488 2024] [wsgi:error] [pid 12725:tid 12734] [remote ::1:56274] Traceback (most recent call last):
+[Tue Jul 30 13:09:36.982083 2024] [wsgi:error] [pid 12725:tid 12734] [remote ::1:56274]   File "/var/www/home-management/app.wsgi", line 6, in <module>
+[Tue Jul 30 13:09:36.982292 2024] [wsgi:error] [pid 12725:tid 12734] [remote ::1:56274]     exec(file_.read(), dict(__file__=activate_this))
+[Tue Jul 30 13:09:36.982611 2024] [wsgi:error] [pid 12725:tid 12734] [remote ::1:56274]   File "<string>", line 4
+[Tue Jul 30 13:09:36.982813 2024] [wsgi:error] [pid 12725:tid 12734] [remote ::1:56274]     deactivate () {
+[Tue Jul 30 13:09:36.983035 2024] [wsgi:error] [pid 12725:tid 12734] [remote ::1:56274]                   ^
+[Tue Jul 30 13:09:36.983147 2024] [wsgi:error] [pid 12725:tid 12734] [remote ::1:56274] SyntaxError: invalid syntax
+[Tue Jul 30 13:09:38.244338 2024] [wsgi:error] [pid 12725:tid 12730] [remote ::1:56290] mod_wsgi (pid=12725): Failed to exec Python script file '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:09:38.244680 2024] [wsgi:error] [pid 12725:tid 12730] [remote ::1:56290] mod_wsgi (pid=12725): Exception occurred processing WSGI script '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:09:38.245834 2024] [wsgi:error] [pid 12725:tid 12730] [remote ::1:56290] Traceback (most recent call last):
+[Tue Jul 30 13:09:38.247038 2024] [wsgi:error] [pid 12725:tid 12730] [remote ::1:56290]   File "/var/www/home-management/app.wsgi", line 6, in <module>
+[Tue Jul 30 13:09:38.247127 2024] [wsgi:error] [pid 12725:tid 12730] [remote ::1:56290]     exec(file_.read(), dict(__file__=activate_this))
+[Tue Jul 30 13:09:38.247311 2024] [wsgi:error] [pid 12725:tid 12730] [remote ::1:56290]   File "<string>", line 4
+[Tue Jul 30 13:09:38.247423 2024] [wsgi:error] [pid 12725:tid 12730] [remote ::1:56290]     deactivate () {
+[Tue Jul 30 13:09:38.247570 2024] [wsgi:error] [pid 12725:tid 12730] [remote ::1:56290]                   ^
+[Tue Jul 30 13:09:38.247668 2024] [wsgi:error] [pid 12725:tid 12730] [remote ::1:56290] SyntaxError: invalid syntax
+[Tue Jul 30 13:09:38.488500 2024] [wsgi:error] [pid 12725:tid 12734] [remote ::1:56296] mod_wsgi (pid=12725): Failed to exec Python script file '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:09:38.489108 2024] [wsgi:error] [pid 12725:tid 12734] [remote ::1:56296] mod_wsgi (pid=12725): Exception occurred processing WSGI script '/var/www/home-management/app.wsgi'.
+[Tue Jul 30 13:09:38.490218 2024] [wsgi:error] [pid 12725:tid 12734] [remote ::1:56296] Traceback (most recent call last):
+[Tue Jul 30 13:09:38.491465 2024] [wsgi:error] [pid 12725:tid 12734] [remote ::1:56296]   File "/var/www/home-management/app.wsgi", line 6, in <module>
+[Tue Jul 30 13:09:38.491574 2024] [wsgi:error] [pid 12725:tid 12734] [remote ::1:56296]     exec(file_.read(), dict(__file__=activate_this))
+[Tue Jul 30 13:09:38.491753 2024] [wsgi:error] [pid 12725:tid 12734] [remote ::1:56296]   File "<string>", line 4
+[Tue Jul 30 13:09:38.491862 2024] [wsgi:error] [pid 12725:tid 12734] [remote ::1:56296]     deactivate () {
+[Tue Jul 30 13:09:38.492008 2024] [wsgi:error] [pid 12725:tid 12734] [remote ::1:56296]                   ^
+[Tue Jul 30 13:09:38.492108 2024] [wsgi:error] [pid 12725:tid 12734] [remote ::1:56296] SyntaxError: invalid syntax
