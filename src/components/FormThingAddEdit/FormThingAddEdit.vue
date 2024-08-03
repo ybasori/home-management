@@ -22,10 +22,12 @@ const errSubmit: Ref<null | string> = ref(null);
 
 
 const onSubmit = () => {
+    const formd = new FormData;
+    formd.append("name",values.value.name);
     onFetch({
         url: "/api/v1/things",
         method: "POST",
-        data: values.value,
+        data: formd,
         beforeSend: () => {
             isLoading.value = true;
             errSubmit.value = null;
