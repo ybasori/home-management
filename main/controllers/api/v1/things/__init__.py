@@ -7,7 +7,7 @@ from sqlalchemy import desc
 
 def things(app):
       
-    @app.route('/api/v1/things', methods = ["GET", "POST"])
+    @app.route('/api/v1/things', methods = ["GET", "POST", "DELETE"])
     def api_v1_things():
         if request.method == "GET":
             t = Things.Things.query.order_by(desc(Things.Things.created_at)).all()
@@ -18,3 +18,12 @@ def things(app):
             db.session.add(t)
             db.session.commit()
             return jsonify({'welcome':'hi', 'data': t.to_dict()}), 200
+        
+
+        if request.method == "DELETE":
+            for uid in request.get_json()['uid']:
+                print('yoho', uid)
+                t = Things.Things.query.filter_by(uid=uid).first()
+                db.session.delete(t)
+                db.session.commit()
+            return jsonify({'welcome':'hi'}), 200
