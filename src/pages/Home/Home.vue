@@ -75,11 +75,13 @@ onMounted(() => {
   </div>
   <div class="row" style="margin-bottom: 1em">
     <div class="col-xs-12">
-      <button class="btn btn-default" @click="onGetThings()">Reload</button>
+      <button class="btn btn-default" @click="onGetThings()"><i class="fa-solid fa-arrows-rotate"></i></button>
     </div>
   </div>
   <div class="row">
-    <div class="col-xs-12" v-if="isLoading">Loading</div>
+    <div class="col-xs-12" v-if="isLoading">
+        <i class="fa-duotone fa-solid fa-spinner fa-spin-pulse"></i>
+    </div>
     <div
       v-if="!isLoading"
       v-for="(item, key) in dataThings"
