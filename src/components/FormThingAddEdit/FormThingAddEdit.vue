@@ -8,8 +8,13 @@ interface IDataThing{
 }
 
 const emit = defineEmits<{
-    (e: "onReload", data: IDataThing): void;
+    (e: "onReload", data: IDataThing | null): void;
     (e: "onClose"): void;
+}>();
+
+const props = defineProps<{
+    initialValues?: IDataThing;
+    isEdit?: boolean;
 }>();
 
 const validation = () => {
@@ -21,6 +26,7 @@ const validation = () => {
 
 const values: Ref<{
     name: string;
+    uid?: string;
 }> = ref({ name: "", });
 const errValues: Ref<{ [key: string]: string }> = ref({});
 const isValid = ref(false);
@@ -29,27 +35,62 @@ const errSubmit: Ref<null | string> = ref(null);
 
 
 const onSubmit = () => {
-    const formd = new FormData;
-    formd.append("name",values.value.name);
-    onFetch({
-        url: "/api/v1/things",
-        method: "POST",
-        data: formd,
-        beforeSend: () => {
-            isLoading.value = true;
-            errSubmit.value = null;
-        },
-        success: (data) => {
-            isLoading.value = false;
-            emit("onClose");
-            emit("onReload", data.data as IDataThing );
-        },
-        error: () => {
-            isLoading.value = false;
-            errSubmit.value = "Something went wrong!"
-        }
-    })
+    if(props.isEdit){
+        const formd = new FormData;
+        formd.append("name",values.value.name);
+        onFetch({
+            url: `/api/v1/things/${props.initialValues?.uid}`,
+            method: "PUT",
+            data: formd,
+            beforeSend: () => {
+                isLoading.value = true;
+                errSubmit.value = null;
+            },
+            success: (data) => {
+                isLoading.value = false;
+                emit("onClose");
+                emit("onReload", null );
+            },
+            error: () => {
+                isLoading.value = false;
+                errSubmit.value = "Something went wrong!"
+            }
+        })
+    }
+    else{
+        const formd = new FormData;
+        formd.append("name",values.value.name);
+        onFetch({
+            url: "/api/v1/things",
+            method: "POST",
+            data: formd,
+            beforeSend: () => {
+                isLoading.value = true;
+                errSubmit.value = null;
+            },
+            success: (data) => {
+                isLoading.value = false;
+                emit("onClose");
+                emit("onReload", data.data as IDataThing );
+            },
+            error: () => {
+                isLoading.value = false;
+                errSubmit.value = "Something went wrong!"
+            }
+        })
+    }
 }
+
+watch(
+    ()=> props?.initialValues,
+    (newValues, oldValues) => {
+        if (!!newValues && JSON.stringify(newValues) !== JSON.stringify(oldValues)) {
+            values.value = {
+                name: newValues.name
+            }
+        }
+    }
+);
 
 
 watch(

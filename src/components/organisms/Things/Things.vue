@@ -73,8 +73,8 @@ const onDeleteThings = () => {
             !selectedDataThings.value.find((sub) => sub.uid === item.uid)
         ),
       ];
-      onToggleModal("things-modal-delete")
-      onToggleModal("things-option")
+      onToggleModal("things-modal-delete");
+      onToggleModal("things-option");
     },
     error() {
       isLoadingDelete.value = false;
@@ -126,7 +126,9 @@ onMounted(() => {
           @onClose="() => (cardAddThings = !cardAddThings)"
           @onReload="
             (result) => {
-              dataThings = [result, ...dataThings];
+              if (!!result) {
+                dataThings = [result, ...dataThings];
+              }
             }
           "
         />
@@ -188,7 +190,13 @@ onMounted(() => {
         role="group"
         aria-label="Vertical button group"
       >
-        <button type="button" class="btn btn-default">Edit</button>
+        <button
+          type="button"
+          class="btn btn-default"
+          @click="onToggleModal('things-modal-edit')"
+        >
+          Edit
+        </button>
         <button
           type="button"
           class="btn btn-default"
@@ -224,7 +232,9 @@ onMounted(() => {
           <button
             type="button"
             class="close"
-            @click="isLoadingDelete?null:onToggleModal('things-modal-delete')"
+            @click="
+              isLoadingDelete ? null : onToggleModal('things-modal-delete')
+            "
           >
             <span aria-hidden="true">×</span>
           </button>
@@ -253,9 +263,63 @@ onMounted(() => {
             @click="onDeleteThings()"
             :disabled="isLoadingDelete"
           >
-            <i v-if="isLoadingDelete" class="fa-duotone fa-solid fa-spinner fa-spin-pulse"></i>
+            <i
+              v-if="isLoadingDelete"
+              class="fa-duotone fa-solid fa-spinner fa-spin-pulse"
+            ></i>
             <span v-else>Sure</span>
           </button>
+        </div>
+      </div>
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <!-- /.modal -->
+  <div
+    :class="`modal fade in`"
+    tabindex="-1"
+    role="dialog"
+    :style="`${
+      isOpenOption.find((item) => item === 'things-modal-edit')
+        ? 'display: block'
+        : ''
+    }`"
+  >
+    <div class="modal-dialog modal-sm" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button
+            type="button"
+            class="close"
+            @click="isLoadingDelete ? null : onToggleModal('things-modal-edit')"
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+          <h4 class="modal-title" id="mySmallModalLabel">
+            Edit
+            {{
+              selectedDataThings.length === 1
+                ? selectedDataThings[0].name
+                : `${selectedDataThings.length} Things`
+            }}
+          </h4>
+        </div>
+        <div class="modal-body">
+          <FormThingAddEdit
+            isEdit
+            :initialValues="selectedDataThings[0]"
+            @onClose="
+              () => {
+                onToggleModal('things-modal-edit');
+              }
+            "
+            @onReload="
+              (result) => {
+                onToggleModal('things-modal-edit');
+                onToggleModal('things-option');
+              }
+            "
+          />
         </div>
       </div>
     </div>
