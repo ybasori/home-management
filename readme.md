@@ -38,6 +38,16 @@ Run development after installing dependencies:
 ```bash
 python app.py
 ```
+Then generate db
+```bash
+python
+```
+```python
+from app import db
+```
+```python
+db.create_all()
+```
 
 ### Frontend
 Install dependencies:
