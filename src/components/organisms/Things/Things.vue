@@ -314,9 +314,9 @@ onMounted(() => {
               }
             "
             @onReload="
-              (result) => {
-                onToggleModal('things-modal-edit');
+              () => {
                 onToggleModal('things-option');
+                onGetThings()
               }
             "
           />

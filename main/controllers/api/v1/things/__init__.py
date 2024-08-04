@@ -22,8 +22,14 @@ def things(app):
 
         if request.method == "DELETE":
             for uid in request.get_json()['uid']:
-                print('yoho', uid)
                 t = Things.Things.query.filter_by(uid=uid).first()
                 db.session.delete(t)
                 db.session.commit()
             return jsonify({'welcome':'hi'}), 200
+    @app.route('/api/v1/things/<uid>', methods = ["PUT"])
+    def api_v1_things_uid(uid):
+        if request.method == "PUT":
+            t = Things.Things.query.filter_by(uid=uid).first()
+            t.name = request.form.get("name")
+            db.session.commit()
+            return jsonify({'welcome':'hi', 'data': t.to_dict()}), 200
