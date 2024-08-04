@@ -34,12 +34,10 @@ const onGetThings = () =>
     },
     success(data) {
       isLoading.value = false;
-      console.log(data);
       dataThings.value = (data as { data: IDataThing[] }).data;
     },
-    error(err) {
+    error() {
       isLoading.value = false;
-      console.log(err);
     },
   });
 
