@@ -3,7 +3,14 @@ import { onFetch } from 'src/helpers/lazyFetch';
 import { ref, Ref, watch } from 'vue';
 import * as yup from "yup";
 
+interface IDataThing{
+    name:string; uid: string
+}
 
+const emit = defineEmits<{
+    (e: "onReload", data: IDataThing): void;
+    (e: "onClose"): void;
+}>();
 
 const validation = () => {
     return yup.object().shape({
@@ -32,8 +39,10 @@ const onSubmit = () => {
             isLoading.value = true;
             errSubmit.value = null;
         },
-        success: () => {
+        success: (data) => {
             isLoading.value = false;
+            emit("onClose");
+            emit("onReload", data.data as IDataThing );
         },
         error: () => {
             isLoading.value = false;

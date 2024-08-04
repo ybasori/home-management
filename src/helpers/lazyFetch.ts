@@ -12,7 +12,7 @@ export const onFetch = async ({
   method?: "DELETE" | "GET" | "POST" | "PUT";
   data?: unknown;
   beforeSend: () => void;
-  success: (data: unknown) => void;
+  success: (data: { data: unknown }) => void;
   error: (err: unknown) => void;
 }) => {
   try {
@@ -22,7 +22,7 @@ export const onFetch = async ({
       method,
       ...(!!data ? { data } : {}),
     });
-    success(response.data.data);
+    success(response.data);
   } catch (err) {
     error(err);
   }

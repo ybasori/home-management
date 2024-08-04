@@ -1,18 +1,20 @@
 from flask import jsonify, request
 from main.models import Things
 from main.models import db
+import uuid
+from sqlalchemy import desc
 
 
-def things(flask_app):
+def things(app):
       
-    @flask_app.route('/api/v1/things', methods = ["GET", "POST"])
+    @app.route('/api/v1/things', methods = ["GET", "POST"])
     def api_v1_things():
         if request.method == "GET":
-            t = Things.Things.query.all()
+            t = Things.Things.query.order_by(desc(Things.Things.created_at)).all()
             return jsonify({'welcome':'hi', 'data': [thing.to_dict() for thing in t]}), 200
         
         if request.method == "POST":
-            t = Things.Things(name=request.form.get("name"))
+            t = Things.Things(name=request.form.get("name"), uid=str(uuid.uuid4()))
             db.session.add(t)
             db.session.commit()
             return jsonify({'welcome':'hi', 'data': t.to_dict()}), 200
