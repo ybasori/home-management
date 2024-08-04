@@ -1,4 +1,10 @@
-# Home Mangement (Apache - Python3 - Flask - Vite - Vue.js)
+# Home Mangement 
+- Apache (just the configuration)
+- Python 3
+- Flask
+- Vite
+- Vue.js
+- SQLite
 
 ## Development
 
