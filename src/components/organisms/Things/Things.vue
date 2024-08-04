@@ -109,12 +109,14 @@ const onGetThings = () =>
     },
   });
 
+
 onMounted(() => {
   onGetThings();
 });
 </script>
 
 <template>
+    
   <div class="panel panel-default">
     <div class="panel-heading">
       <h4 class="panel-title">
@@ -185,7 +187,7 @@ onMounted(() => {
           class="panel-body"
           style="display: flex; align-items: center; justify-content: center"
         >
-        <div class="" style="height: 12rem;"></div>
+          <div class="" style="height: 12rem"></div>
           <i class="fa-solid fa-circle-info"></i>
         </div>
         <div class="panel-footer">

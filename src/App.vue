@@ -1,15 +1,55 @@
 <script setup lang="ts">
+import { ref } from "vue";
 import { RouterLink } from "vue-router";
+
+const fullscreen = ref(false);
+
+const toggleFullScreen = () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+    fullscreen.value = true;
+  } else if (document.exitFullscreen) {
+    fullscreen.value = false;
+    document.exitFullscreen();
+  }
+};
 </script>
 
 <template>
-  <div class="container-fluid" style="display: flex; flex-direction: column; height: 100vh; padding-top: 2rem;">
+  <div
+    class="container-fluid"
+    style="
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      padding-top: 2rem;
+    "
+  >
     <RouterView />
-    <ul class="nav nav-pills nav-justified" style="margin-top: auto; margin-bottom: 2rem;">
-      <li role="presentation" :class="`${$route.path==='/'?'active':''}`">
-        <RouterLink to="/">Things</RouterLink>
-      </li>
-      <li role="presentation" :class="`${$route.path==='/about'?'active':''}`"><RouterLink to="/about">About</RouterLink></li>
-    </ul>
+    <div
+      style="display: flex; width: 100%; margin-top: auto; margin-bottom: 2rem"
+    >
+      <ul class="nav nav-pills nav-justified">
+        <li
+          role="presentation"
+          :class="`${$route.path === '/' ? 'active' : ''}`"
+        >
+          <RouterLink to="/">Things</RouterLink>
+        </li>
+        <li
+          role="presentation"
+          :class="`${$route.path === '/about' ? 'active' : ''}`"
+        >
+          <RouterLink to="/about">About</RouterLink>
+        </li>
+      </ul>
+      <button class="btn btn-default" @click="toggleFullScreen()">
+        <i
+          v-if="fullscreen"
+          class="fa-solid fa-up-right-and-down-left-from-center"
+        ></i>
+        <i v-else class="fa-solid fa-down-left-and-up-right-to-center"></i>
+      </button>
+    </div>
   </div>
 </template>
