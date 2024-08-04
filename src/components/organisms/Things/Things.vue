@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { watch } from "fs";
 import FormThingAddEdit from "src/components/FormThingAddEdit/FormThingAddEdit.vue";
 import { onFetch } from "src/helpers/lazyFetch";
 import { onMounted, Ref, ref } from "vue";
@@ -8,6 +9,7 @@ interface IDataThing {
   uid: string;
 }
 
+const editSubmit: Ref<HTMLButtonElement | null> = ref(null);
 const isOpenOption: Ref<string[]> = ref([]);
 const cardAddThings = ref(false);
 const isLoading = ref(false);
@@ -15,17 +17,20 @@ const isLoadingDelete = ref(false);
 const dataThings: Ref<IDataThing[]> = ref([]);
 const lastMouseDown: Ref<number> = ref(0);
 const selectedDataThings: Ref<IDataThing[]> = ref([]);
-const onMouseDown = (data: IDataThing) => {
+const onMouseDown = (data: IDataThing, e: MouseEvent) => {
   lastMouseDown.value = new Date().getTime();
 
-  let ls = [...selectedDataThings.value];
-  if (!!ls.find((item) => item.uid === data.uid)) {
-    ls = [];
+  if (e.ctrlKey) {
+    let ls = [...selectedDataThings.value];
+    if (!!ls.find((item) => item === data)) {
+      ls = [...ls.filter((item) => item !== data)];
+    } else {
+      ls = [...ls, data];
+    }
+    selectedDataThings.value = ls;
   } else {
-    ls = [data];
+    selectedDataThings.value = [data];
   }
-
-  selectedDataThings.value = ls;
 };
 const onToggleModal = (value: string) => {
   let ls = [...isOpenOption.value];
@@ -54,7 +59,7 @@ const onToggleModal = (value: string) => {
 const onMouseUp = (data: IDataThing) => {
   if (new Date().getTime() - lastMouseDown.value >= 500) {
     onToggleModal("things-option");
-    selectedDataThings.value = [data];
+    // selectedDataThings.value = [data];
   }
 };
 const onDeleteThings = () => {
@@ -74,7 +79,10 @@ const onDeleteThings = () => {
         ),
       ];
       onToggleModal("things-modal-delete");
-      onToggleModal("things-option");
+      if (isOpenOption.value.find((item) => item === "things-option")) {
+        onToggleModal("things-option");
+      }
+      selectedDataThings.value = [];
     },
     error() {
       isLoadingDelete.value = false;
@@ -123,6 +131,7 @@ onMounted(() => {
     <div :class="`panel-collapse collapse ${cardAddThings ? 'in' : ''}`">
       <div class="panel-body">
         <FormThingAddEdit
+          :noActionButton="false"
           @onClose="() => (cardAddThings = !cardAddThings)"
           @onReload="
             (result) => {
@@ -131,7 +140,8 @@ onMounted(() => {
               }
             }
           "
-        />
+        >
+        </FormThingAddEdit>
       </div>
     </div>
   </div>
@@ -140,14 +150,22 @@ onMounted(() => {
       <button class="btn btn-default" @click="onGetThings()">
         <i class="fa-solid fa-arrows-rotate"></i>
       </button>
+
+      <button
+        v-if="selectedDataThings.length > 0"
+        class="btn btn-default"
+        @click="onToggleModal('things-modal-delete')"
+      >
+        <i class="fa-regular fa-trash-can"></i>
+      </button>
     </div>
   </div>
-  <div class="row">
+  <div class="row" style="overflow: auto">
     <div class="col-xs-12" v-if="isLoading">
       <i class="fa-duotone fa-solid fa-spinner fa-spin-pulse"></i>
     </div>
     <div
-      v-if="!isLoading"
+      v-else="!isLoading"
       v-for="(item, key) in dataThings"
       class="col-xs-4"
       v-bind:key="key"
@@ -158,11 +176,16 @@ onMounted(() => {
             ? 'primary'
             : 'default'
         }`"
-        @mousedown="onMouseDown(item)"
+        @mousedown="onMouseDown(item, $event)"
         @mouseup="onMouseUp(item)"
         @dblclick="onDblClick(item)"
+        draggable="true"
       >
-        <div class="panel-body">
+        <div
+          class="panel-body"
+          style="display: flex; align-items: center; justify-content: center"
+        >
+        <div class="" style="height: 12rem;"></div>
           <i class="fa-solid fa-circle-info"></i>
         </div>
         <div class="panel-footer">
@@ -191,6 +214,7 @@ onMounted(() => {
         aria-label="Vertical button group"
       >
         <button
+          v-if="selectedDataThings.length === 1"
           type="button"
           class="btn btn-default"
           @click="onToggleModal('things-modal-edit')"
@@ -304,27 +328,48 @@ onMounted(() => {
             }}
           </h4>
         </div>
-        <div class="modal-body">
-          <FormThingAddEdit
-            isEdit
-            :initialValues="selectedDataThings[0]"
-            @onClose="
-              () => {
-                onToggleModal('things-modal-edit');
-              }
-            "
-            @onReload="
-              () => {
-                onToggleModal('things-option');
-                onGetThings()
-              }
-            "
-          />
-        </div>
+        <FormThingAddEdit
+          noActionButton
+          isEdit
+          :initialValues="selectedDataThings[0]"
+          @onClose="
+            () => {
+              onToggleModal('things-modal-edit');
+            }
+          "
+          @onReload="
+            () => {
+              onToggleModal('things-option');
+              onGetThings();
+            }
+          "
+        >
+          <template v-slot:action-button="slotProps">
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-default"
+                @click="onToggleModal('things-modal-edit')"
+              >
+                Close
+              </button>
+              <button
+                type="submit"
+                class="btn btn-primary"
+                @click="editSubmit?.click()"
+                :disabled="!slotProps.isValid || slotProps.isLoading"
+              >
+                {{ slotProps.isLoading ? "Wait..." : "Edit" }}
+              </button>
+            </div>
+          </template>
+        </FormThingAddEdit>
       </div>
     </div>
+
     <!-- /.modal-dialog -->
   </div>
+
   <!-- /.modal -->
   <div v-if="isOpenOption.length > 0" class="modal-backdrop fade in"></div>
 </template>
