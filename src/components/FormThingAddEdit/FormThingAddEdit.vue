@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { expandJSON } from "src/helpers/helpers";
 import { onFetch } from "src/helpers/lazyFetch";
 import { ref, Ref, watch } from "vue";
 import * as yup from "yup";
@@ -41,9 +42,13 @@ const onReset = () => {
 }
 
 const onSubmit = () => {
-  if (props.isEdit) {
+    
     const formd = new FormData();
-    formd.append("name", values.value.name);
+    const bd = expandJSON(values.value);
+    for (const key in bd) {
+        formd.append(bd[key].label, bd[key].value as string | Blob);
+    }
+  if (props.isEdit) {
     onFetch({
       url: `/api/v1/things/${props.initialValues?.uid}`,
       method: "PUT",
@@ -63,8 +68,6 @@ const onSubmit = () => {
       },
     });
   } else {
-    const formd = new FormData();
-    formd.append("name", values.value.name);
     onFetch({
       url: "/api/v1/things",
       method: "POST",
