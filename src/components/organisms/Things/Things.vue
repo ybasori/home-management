@@ -4,10 +4,12 @@ import FormThingAddEdit from "src/components/FormThingAddEdit/FormThingAddEdit.v
 import { expandJSON } from "src/helpers/helpers";
 import { onFetch } from "src/helpers/lazyFetch";
 import { onMounted, Ref, ref } from "vue";
+import Properties from "../Properties/Properties.vue";
 
 interface IDataThing {
   name: string;
   uid: string;
+  prefs: string[];
 }
 
 const editSubmit: Ref<HTMLButtonElement | null> = ref(null);
@@ -108,13 +110,16 @@ const childFetch = (uid: string) => {
       isLoading.value = false;
     },
   });
-}
+};
 
 const onDblClick = (data: IDataThing) => {
   selectedDataThings.value = [];
-  breadCrumb.value = [...breadCrumb.value, data];
 
-  return childFetch(data.uid)
+  if (data.prefs.find((item) => item === "storage")) {
+    breadCrumb.value = [...breadCrumb.value, data];
+    return childFetch(data.uid);
+  }
+  return null
 };
 
 const onGetThings = () =>
@@ -133,27 +138,33 @@ const onGetThings = () =>
     },
   });
 
-
 onMounted(() => {
   onGetThings();
 });
 
-
 const drag = (ev: DragEvent, item: IDataThing) => {
   ev.dataTransfer?.setData("text", JSON.stringify(item));
-}
+};
 
 const allowDrop = (ev: DragEvent) => {
   ev.preventDefault();
-}
+};
 
 const drop = (ev: DragEvent, item: IDataThing | null) => {
   ev.preventDefault();
-  var data = { ...JSON.parse(ev.dataTransfer?.getData("text") ?? ''), parent_uid: item?.uid ?? null };
-  if (((!!item && data.uid !== item?.uid) || !item) && selectedDataThings.value.length === 1) {
+  var data = {
+    ...JSON.parse(ev.dataTransfer?.getData("text") ?? ""),
+    parent_uid: item?.uid ?? null,
+  };
+  if (
+    ((!!item &&
+      data.uid !== item?.uid &&
+      !!item?.prefs.find((item) => item === "storage")) ||
+      !item) &&
+    selectedDataThings.value.length === 1
+  ) {
     const formd = new FormData();
     const bd = expandJSON(data);
-    console.log(data, bd);
     for (const key in bd) {
       formd.append(bd[key].label, bd[key].value as string | Blob);
     }
@@ -169,30 +180,27 @@ const drop = (ev: DragEvent, item: IDataThing | null) => {
         // dataThings.value = (data as { data: IDataThing[] }).data;
 
         dataThings.value = [
-          ...dataThings.value.filter(
-            (item) =>
-              item.uid !== data.uid
-          ),
-        ]
+          ...dataThings.value.filter((item) => item.uid !== data.uid),
+        ];
       },
       error() {
         isLoadingEdit.value = false;
       },
     });
   }
-}
+};
 
 const onBreadCrumbHome = () => {
   breadCrumb.value = [];
   selectedDataThings.value = [];
   return onGetThings();
-}
+};
 const onBreadCrumb = (key: number) => {
   breadCrumb.value = breadCrumb.value.filter((_, i) => i <= key);
 
   selectedDataThings.value = [];
-  return childFetch(breadCrumb.value[key].uid)
-}
+  return childFetch(breadCrumb.value[key].uid);
+};
 </script>
 
 <template>
@@ -206,13 +214,14 @@ const onBreadCrumb = (key: number) => {
     </div>
     <div :class="`panel-collapse collapse ${cardAddThings ? 'in' : ''}`">
       <div class="panel-body">
-        <FormThingAddEdit
-          :initialValues="breadCrumb.length > 0 ? { parent_uid: breadCrumb[breadCrumb.length - 1].uid } : undefined"
-          :noActionButton="false" @onClose="() => (cardAddThings = !cardAddThings)" @onReload="(result) => {
-            if (!!result) {
-              dataThings = [result, ...dataThings];
+        <FormThingAddEdit v-if="cardAddThings" :initialValues="breadCrumb.length > 0
+            ? { parent_uid: breadCrumb[breadCrumb.length - 1].uid }
+            : undefined
+          " :noActionButton="false" @onClose="() => (cardAddThings = !cardAddThings)" @onReload="(result) => {
+              if (!!result) {
+                dataThings = [result, ...dataThings];
+              }
             }
-          }
             ">
         </FormThingAddEdit>
       </div>
@@ -221,30 +230,30 @@ const onBreadCrumb = (key: number) => {
 
   <div class="row">
     <div class="col-xs-12">
-      <button v-if="breadCrumb.length !== 0" class="btn btn-default" @click="onBreadCrumbHome()" @drop="drop($event, null)" @dragover="allowDrop($event)">
+      <button v-if="breadCrumb.length !== 0" class="btn btn-default" @click="onBreadCrumbHome()"
+        @drop="drop($event, null)" @dragover="allowDrop($event)">
         Home
       </button>
-      <button v-else class="btn btn-default" disabled>
-        Home
-      </button>
+      <button v-else class="btn btn-primary" disabled>Home</button>
       <template v-for="(item, key) in breadCrumb" :key="key">
-
-        <button v-if="key < breadCrumb.length - 1" class="btn btn-default" @click="onBreadCrumb(key)" @drop="drop($event, item)" @dragover="allowDrop($event)">
+        <button v-if="key < breadCrumb.length - 1" class="btn btn-default" @click="onBreadCrumb(key)"
+          @drop="drop($event, item)" @dragover="allowDrop($event)">
           {{ item.name }}
         </button>
-        <button v-else class="btn btn-default" disabled>
+        <button v-else class="btn btn-primary" disabled>
           {{ item.name }}
         </button>
-
       </template>
-
     </div>
   </div>
 
   <div class="row" style="margin-bottom: 1em">
     <div class="col-xs-12">
-      <button class="btn btn-default"
-        @click="breadCrumb.length === 0 ? onGetThings() : childFetch(breadCrumb[breadCrumb.length - 1].uid)">
+      <button class="btn btn-default" @click="
+        breadCrumb.length === 0
+          ? onGetThings()
+          : childFetch(breadCrumb[breadCrumb.length - 1].uid)
+        ">
         <i class="fa-solid fa-arrows-rotate"></i>
       </button>
 
@@ -261,8 +270,8 @@ const onBreadCrumb = (key: number) => {
     <div v-else="!isLoading" v-for="(item, key) in dataThings" class="col-xs-4" v-bind:key="key"
       @drop="drop($event, item)" @dragover="allowDrop($event)">
       <div :class="`panel panel-${selectedDataThings.find((sub) => sub.uid === item.uid)
-        ? 'primary'
-        : 'default'
+          ? 'primary'
+          : 'default'
         }`" @mousedown="onMouseDown(item, $event)" @mouseup="onMouseUp(item)" @dblclick="onDblClick(item)"
         :draggable="selectedDataThings.length === 1" @dragstart="drag($event, item)">
         <div class="panel-body" style="display: flex; align-items: center; justify-content: center">
@@ -279,14 +288,18 @@ const onBreadCrumb = (key: number) => {
   </div>
 
   <div :class="`modal fade in`" tabindex="-1" role="dialog" :style="`${isOpenOption.find((item) => item === 'things-option')
-    ? 'display: block'
-    : ''
+      ? 'display: block'
+      : ''
     }`">
     <div class="modal-dialog modal-sm" role="document">
       <div class="btn-group-vertical btn-block" role="group" aria-label="Vertical button group">
         <button v-if="selectedDataThings.length === 1" type="button" class="btn btn-default"
           @click="onToggleModal('things-modal-edit')">
           Edit
+        </button>
+        <button v-if="selectedDataThings.length === 1" type="button" class="btn btn-default"
+          @click="onToggleModal('things-modal-properties')">
+          Properties
         </button>
         <button type="button" class="btn btn-default" @click="onToggleModal('things-modal-delete')">
           Delete
@@ -300,8 +313,8 @@ const onBreadCrumb = (key: number) => {
   </div>
   <!-- /.modal -->
   <div :class="`modal fade in`" tabindex="-1" role="dialog" :style="`${isOpenOption.find((item) => item === 'things-modal-delete')
-    ? 'display: block'
-    : ''
+      ? 'display: block'
+      : ''
     }`">
     <div class="modal-dialog modal-sm" role="document">
       <div class="modal-content">
@@ -337,8 +350,8 @@ const onBreadCrumb = (key: number) => {
   </div>
   <!-- /.modal -->
   <div :class="`modal fade in`" tabindex="-1" role="dialog" :style="`${isOpenOption.find((item) => item === 'things-modal-edit')
-    ? 'display: block'
-    : ''
+      ? 'display: block'
+      : ''
     }`">
     <div class="modal-dialog modal-sm" role="document">
       <div class="modal-content">
@@ -356,12 +369,12 @@ const onBreadCrumb = (key: number) => {
           </h4>
         </div>
         <FormThingAddEdit noActionButton isEdit :initialValues="selectedDataThings[0]" @onClose="() => {
-          onToggleModal('things-modal-edit');
-        }
-          " @onReload="() => {
-            onToggleModal('things-option');
-            onGetThings();
+            onToggleModal('things-modal-edit');
           }
+          " @onReload="() => {
+              onToggleModal('things-option');
+              onGetThings();
+            }
             ">
           <template v-slot:action-button="slotProps">
             <div class="modal-footer">
@@ -382,6 +395,38 @@ const onBreadCrumb = (key: number) => {
   </div>
 
   <!-- /.modal -->
+  <div :class="`modal fade in`" tabindex="-1" role="dialog" :style="`${isOpenOption.find((item) => item === 'things-modal-properties')
+      ? 'display: block'
+      : ''
+    }`">
+    <div class="modal-dialog modal-md" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" @click="
+            isLoadingDelete ? null : onToggleModal('things-modal-properties')
+            ">
+            <span aria-hidden="true">×</span>
+          </button>
+          <h4 class="modal-title" id="mySmallModalLabel">
+            Properties of
+            {{
+              selectedDataThings.length === 1
+                ? selectedDataThings[0].name
+                : `${selectedDataThings.length} Things`
+            }}
+          </h4>
+        </div>
+        <Properties v-if="isOpenOption.find((item) => item === 'things-modal-properties')"
+          :initialValues="selectedDataThings[0]" @onClose="() => onToggleModal('things-modal-properties')" @onReload="() => {
+              onToggleModal('things-option');
+              onGetThings();
+            }
+            " />
+      </div>
+    </div>
+
+    <!-- /.modal-dialog -->
+  </div>
   <div v-if="isOpenOption.length > 0" class="modal-backdrop fade in"></div>
 </template>
 

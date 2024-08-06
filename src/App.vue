@@ -17,7 +17,7 @@ const toggleFullScreen = () => {
 
 <template>
   <div
-    class="container-fluid"
+    class="container-fluid wrapper"
     style="
       display: flex;
       flex-direction: column;
@@ -53,3 +53,10 @@ const toggleFullScreen = () => {
     </div>
   </div>
 </template>
+
+<style lang="scss" scoped>
+.wrapper{
+  max-width: 500px;
+  width: 100%;
+}
+</style>

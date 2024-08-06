@@ -8,6 +8,7 @@ interface IDataThing {
     name: string;
     uid: string;
     parent_uid?: string;
+    prefs: string[];
 }
 interface IInitDataThing {
     name?: string;

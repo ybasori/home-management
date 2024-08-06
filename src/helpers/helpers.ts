@@ -1,7 +1,11 @@
+interface IConfig {
+  arrayNoNumber: boolean;
+}
 const onArrayForm = (
   name: string,
   data: { [key: string]: unknown },
-  obj: { label: string; value: unknown }[]
+  obj: { label: string; value: unknown }[],
+  config?: IConfig
 ) => {
   let newObj = [...obj];
   for (const key in data) {
@@ -10,19 +14,31 @@ const onArrayForm = (
       (Array.isArray(data[key]) || typeof data[key] === "object") &&
       !(data[key] instanceof File)
     ) {
+      let labelName = `${name}[${key}]`;
+      if (!isNaN(Number(key)) && config?.arrayNoNumber) {
+        labelName = `${name}[]`;
+      }
       newObj = onArrayForm(
-        `${name}[${key}]`,
+        labelName,
         data[key] as { [key: string]: unknown },
-        newObj
+        newObj,
+        config
       );
     } else {
-      newObj = [...newObj, { label: `${name}[${key}]`, value: data[key] }];
+      let labelName = `${name}[${key}]`;
+      if (!isNaN(Number(key)) && config?.arrayNoNumber) {
+        labelName = `${name}[]`;
+      }
+      newObj = [...newObj, { label: labelName, value: data[key] }];
     }
   }
   return newObj;
 };
 
-export const expandJSON = (data: { [key: string]: unknown }) => {
+export const expandJSON = (
+  data: { [key: string]: unknown },
+  config?: IConfig
+) => {
   let obj: { label: string; value: unknown }[] = [];
   for (const key in data) {
     if (
@@ -30,10 +46,13 @@ export const expandJSON = (data: { [key: string]: unknown }) => {
       (Array.isArray(data[key]) ||
         (typeof data[key] === "object" && !(data[key] instanceof File)))
     ) {
-      console.log(key, data[key], 1);
-      obj = onArrayForm(`${key}`, data[key] as { [key: string]: unknown }, obj);
+      obj = onArrayForm(
+        `${key}`,
+        data[key] as { [key: string]: unknown },
+        obj,
+        config
+      );
     } else {
-      console.log(key, data[key], 2);
       obj = [
         ...obj,
         {
