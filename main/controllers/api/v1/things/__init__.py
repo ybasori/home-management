@@ -65,4 +65,8 @@ def things(app):
         if request.method == "GET":
             tp = Things.Things.query.filter_by(uid=uid).first()
             t = Things.Things.query.filter_by(parent_id=tp.id).order_by(desc(Things.Things.created_at)).all()
-            return jsonify({'welcome':'hi', 'data': [thing.to_dict() for thing in t]}), 200
+            ti = []
+            for thing in t:
+                p = Prefs.Prefs.query.filter_by(things_id=thing.id).all()
+                ti.append({'name': thing.name, 'uid': thing.uid, 'prefs': [pf.to_dict() for pf in p]})
+            return jsonify({'welcome':'hi', 'data': [thing for thing in ti]}), 200

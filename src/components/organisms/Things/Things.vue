@@ -113,13 +113,15 @@ const childFetch = (uid: string) => {
 };
 
 const onDblClick = (data: IDataThing) => {
-  selectedDataThings.value = [];
-
   if (data.prefs.find((item) => item === "storage")) {
+    selectedDataThings.value = [];
     breadCrumb.value = [...breadCrumb.value, data];
     return childFetch(data.uid);
+  } else {
+    selectedDataThings.value = [data];
+    // onToggleModal("things-option");
+    onToggleModal("things-modal-properties");
   }
-  return null;
 };
 
 const onGetThings = () =>
@@ -483,7 +485,9 @@ const onBreadCrumb = (key: number) => {
           @onReload="
             () => {
               onToggleModal('things-option');
-              onGetThings();
+              breadCrumb.length === 0
+                ? onGetThings()
+                : childFetch(breadCrumb[breadCrumb.length - 1].uid);
             }
           "
         >
@@ -530,9 +534,7 @@ const onBreadCrumb = (key: number) => {
           <button
             type="button"
             class="close"
-            @click="
-              isLoadingDelete ? null : onToggleModal('things-modal-properties')
-            "
+            @click="onToggleModal('things-modal-properties')"
           >
             <span aria-hidden="true">×</span>
           </button>
@@ -552,7 +554,9 @@ const onBreadCrumb = (key: number) => {
           @onReload="
             () => {
               onToggleModal('things-option');
-              onGetThings();
+              breadCrumb.length === 0
+                ? onGetThings()
+                : childFetch(breadCrumb[breadCrumb.length - 1].uid);
             }
           "
         />
