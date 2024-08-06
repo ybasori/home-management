@@ -55,7 +55,7 @@ const toggleFullScreen = () => {
 </template>
 
 <style lang="scss" scoped>
-.wrapper{
+.wrapper {
   max-width: 500px;
   width: 100%;
 }
