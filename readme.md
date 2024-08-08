@@ -46,13 +46,10 @@ python app.py
 ```
 Then generate db
 ```bash
-python
+flask db migrate
 ```
-```python
-from app import db
-```
-```python
-db.create_all()
+```bash
+flask db upgrade
 ```
 
 ### Frontend

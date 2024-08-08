@@ -26,7 +26,10 @@ def things(app):
                 t.parent_id = tparent.id 
             db.session.add(t)
             db.session.commit()
-            return jsonify({'welcome':'hi', 'data': t.to_dict()}), 200
+            ti=[]
+            p = Prefs.Prefs.query.filter_by(things_id=t.id).all()
+            ti.append({'name': t.name, 'uid': t.uid, 'prefs': [pf.to_dict() for pf in p]})
+            return jsonify({'welcome':'hi', 'data': ti[0]}), 200
         
 
         if request.method == "DELETE":

@@ -485,9 +485,11 @@ const onBreadCrumb = (key: number) => {
           @onReload="
             () => {
               onToggleModal('things-option');
-              breadCrumb.length === 0
-                ? onGetThings()
-                : childFetch(breadCrumb[breadCrumb.length - 1].uid);
+              if (breadCrumb.length === 0) {
+                onGetThings();
+              } else {
+                childFetch(breadCrumb[breadCrumb.length - 1].uid);
+              }
             }
           "
         >
@@ -554,9 +556,11 @@ const onBreadCrumb = (key: number) => {
           @onReload="
             () => {
               onToggleModal('things-option');
-              breadCrumb.length === 0
-                ? onGetThings()
-                : childFetch(breadCrumb[breadCrumb.length - 1].uid);
+              if (breadCrumb.length === 0) {
+                onGetThings();
+              } else {
+                childFetch(breadCrumb[breadCrumb.length - 1].uid);
+              }
             }
           "
         />
