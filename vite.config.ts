@@ -31,7 +31,7 @@ export default defineConfig({
       output: {
         entryFileNames: `assets/bundle.js`,
         chunkFileNames: `assets/[name]-[hash].js`,
-        assetFileNames: `assets/styles.css`,
+        assetFileNames: `assets/[name].[ext]`,
       },
     },
   },
