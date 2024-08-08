@@ -1,92 +1,137 @@
 <script lang="ts" setup>
-import { expandJSON } from "src/helpers/helpers";
+import { onMounted, ref } from "vue";
+import FormAddPhoto from "../FormAddPhoto/FormAddPhoto.vue";
+import { watch } from "vue";
+import { Ref } from "vue";
 import { onFetch } from "src/helpers/lazyFetch";
-import { onMounted, Ref, ref } from "vue";
+import { useMediaDevice } from "src/hooks/useMediaDevice";
+import { expandJSON } from "src/helpers/helpers";
 
-const videoStream: Ref<HTMLVideoElement | null> = ref(null);
-const outputCanvas: Ref<HTMLCanvasElement | null> = ref(null);
-const imagePreview: Ref<HTMLImageElement | null> = ref(null);
-const showImage = ref(false);
-const imageFile: Ref<File | null> = ref(null);
-const isLoading = ref(false);
+interface IInitDataThing {
+  name: string;
+  uid: string;
+  parent_uid?: string;
+  prefs: string[];
+}
+interface IPhotoData {
+  uid: string;
+  filename: string;
+  description: string;
+}
+
+const props = defineProps<{
+  initialValues?: IInitDataThing;
+}>();
+const emit = defineEmits<{
+  (e: "setIsLoading", value: boolean): void;
+  (e: "onReload"): void;
+}>();
+const { onCloseCamera } = useMediaDevice();
+
 const openCard = ref(false);
+const photos: Ref<IPhotoData[]> = ref([]);
+const selectedDataThings: Ref<IPhotoData[]> = ref([]);
+const isOpenOption: Ref<string[]> = ref([]);
+const isLoadingDelete = ref(false);
+const isLoadingMain = ref(false);
 
-const onCapture = () => {
-  if (!!outputCanvas.value) {
-    const ctxt = outputCanvas.value.getContext("2d");
-    outputCanvas.value.width = 400;
-    outputCanvas.value.height = 400;
+const getAllPhoto = () =>
+  onFetch({
+    url: `/api/v1/things/${props.initialValues?.uid}/photos`,
+    method: "GET",
+    beforeSend: () => null,
+    success(response) {
+      photos.value = [...(response.data as IPhotoData[])];
+    },
+    error: () => null,
+  });
 
-    if (ctxt && !!videoStream.value) {
-      ctxt.drawImage(
-        videoStream.value,
-        0,
-        0,
-        outputCanvas.value.width,
-        outputCanvas.value.height
-      );
+const onMouseDown = (data: IPhotoData, e: MouseEvent) => {
+  // lastMouseDown.value = new Date().getTime();
+
+  if (e.ctrlKey) {
+    let ls = [...selectedDataThings.value];
+    if (!!ls.find((item) => item === data)) {
+      ls = [...ls.filter((item) => item !== data)];
+    } else {
+      ls = [...ls, data];
     }
-
-    if (!!imagePreview.value) {
-      imagePreview.value.src = outputCanvas.value.toDataURL();
-      outputCanvas.value.toBlob((blob) => {
-        imageFile.value = new File(
-          [blob as unknown as BlobPart],
-          "fileName.jpg",
-          { type: "image/jpeg" }
-        );
-      }, "image/jpeg");
-    }
-
-    showImage.value = true;
+    selectedDataThings.value = ls;
+  } else {
+    selectedDataThings.value = [data];
   }
 };
 
-const onReset = () => {
-  showImage.value = false;
+const onToggleModal = (value: string) => {
+  let ls = [...isOpenOption.value];
+  if (!!ls.find((item) => item === value)) {
+    ls = [...ls.filter((item) => item !== value)];
+  } else {
+    ls = [...ls, value];
+  }
+
+  if (ls.length <= 0) {
+    document.body.classList.remove("modal-open");
+  } else {
+    if (!document.body.classList.contains("modal-option")) {
+      document.body.classList.add("modal-open");
+    }
+  }
+  isOpenOption.value = ls;
 };
 
-const onUpload = () => {
-  const formd = new FormData();
-  const bd = expandJSON({ file: imageFile.value });
-  for (const key in bd) {
-    formd.append(bd[key].label, bd[key].value as string | Blob);
-  }
+const onDeleteThings = () => {
   onFetch({
     url: `/api/v1/uploads`,
-    method: "POST",
-    data: formd,
+    method: "DELETE",
+    data: { uid: selectedDataThings.value.map((item) => item.uid) },
     beforeSend() {
-      isLoading.value = true;
+      isLoadingDelete.value = true;
     },
     success() {
-      isLoading.value = false;
-      openCard.value = false;
+      isLoadingDelete.value = false;
+      photos.value = [
+        ...photos.value.filter(
+          (item) =>
+            !selectedDataThings.value.find((sub) => sub.uid === item.uid)
+        ),
+      ];
+      onToggleModal("things-modal-delete");
+      selectedDataThings.value = [];
+      emit("onReload");
     },
     error() {
-      isLoading.value = false;
+      isLoadingDelete.value = false;
+    },
+  });
+};
+const onMainThings = () => {
+  const formd = new FormData();
+  const dt = expandJSON({ ...selectedDataThings.value[0], main: 1 });
+  for (const k in dt) {
+    formd.append(dt[k].label, dt[k].value as string);
+  }
+  onFetch({
+    url: `/api/v1/things/${props.initialValues?.uid}/photos/${selectedDataThings.value[0].uid}`,
+    method: "PUT",
+    data: formd,
+    beforeSend() {
+      isLoadingMain.value = true;
+    },
+    success() {
+      isLoadingMain.value = false;
+      onToggleModal("things-modal-main");
+      selectedDataThings.value = [];
+      emit("onReload");
+    },
+    error() {
+      isLoadingMain.value = false;
     },
   });
 };
 
 onMounted(() => {
-  navigator.mediaDevices
-    .getUserMedia({
-      audio: false,
-      video: {
-        width: 400,
-        height: 400,
-      },
-    })
-    .then((stream) => {
-      if (videoStream.value) {
-        videoStream.value.srcObject = stream;
-        videoStream.value.play();
-      }
-    })
-    .catch((err) => {
-      alert(err);
-    });
+  getAllPhoto();
 });
 </script>
 <template>
@@ -97,7 +142,12 @@ onMounted(() => {
           role="button"
           data-toggle="collapse"
           href="javascript:void(0)"
-          @click="openCard = !openCard"
+          @click="
+            () => {
+              onCloseCamera();
+              openCard = !openCard;
+            }
+          "
         >
           Add Photo
         </a>
@@ -105,45 +155,188 @@ onMounted(() => {
     </div>
     <div :class="`panel-collapse collapse ${openCard ? 'in' : ''}`">
       <div class="panel-body">
-        <form>
-          <div style="display: flex; flex-direction: column">
-            <video
-              ref="videoStream"
-              :style="`display: ${showImage ? 'none' : 'block'}`"
-            ></video>
-            <canvas ref="outputCanvas" style="display: none"></canvas>
-            <img
-              ref="imagePreview"
-              alt=""
-              :style="`display: ${!showImage ? 'none' : 'block'}`"
-            />
-            <button
-              type="button"
-              class="btn btn-default"
-              @click="onReset()"
-              :style="`display: ${!showImage ? 'none' : 'block'}`"
-            >
-              Reset
-            </button>
-            <button
-              type="button"
-              class="btn btn-default"
-              @click="onCapture()"
-              :style="`display: ${showImage ? 'none' : 'block'}`"
-            >
-              Capture
-            </button>
-            <button
-              type="button"
-              class="btn btn-default"
-              @click="onUpload()"
-              :style="`display: ${showImage ? 'none' : 'block'}`"
-            >
-              Upload
-            </button>
-          </div>
-        </form>
+        <FormAddPhoto
+          v-if="openCard"
+          @onClose="
+            () => {
+              onCloseCamera();
+              openCard = false;
+            }
+          "
+          :initialValues="props.initialValues"
+          @onReload="(value) => (photos = [{ ...value }, ...photos])"
+          @setIsLoading="(value) => emit('setIsLoading', value)"
+        />
       </div>
     </div>
   </div>
+  <div class="row">
+    <div class="col-xs-12">
+      <button
+        v-if="selectedDataThings.length > 0"
+        class="btn btn-default"
+        @click="onToggleModal('things-modal-delete')"
+      >
+        <i class="fa-regular fa-trash-can"></i>
+      </button>
+      <button
+        v-if="selectedDataThings.length == 1"
+        class="btn btn-default"
+        @click="onToggleModal('things-modal-main')"
+      >
+        <i class="fa-solid fa-circle-info"></i>
+      </button>
+    </div>
+  </div>
+  <div class="row">
+    <div v-for="(item, index) in photos" class="col-xs-4" :key="index">
+      <div
+        href="javascript:void(0)"
+        class="thumbnail t-parent"
+        @mousedown="onMouseDown(item, $event)"
+      >
+        <img :src="`/uploads/${item.filename}`" alt="..." />
+        <div
+          v-if="selectedDataThings.find((sub) => sub.uid === item.uid)"
+          class="selected-check"
+        >
+          <i class="fa-solid fa-check"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    :class="`modal fade in`"
+    tabindex="-1"
+    role="dialog"
+    :style="`${
+      isOpenOption.find((item) => item === 'things-modal-delete')
+        ? 'display: block'
+        : ''
+    }`"
+  >
+    <div class="modal-dialog modal-sm" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button
+            type="button"
+            class="close"
+            @click="
+              isLoadingDelete ? null : onToggleModal('things-modal-delete')
+            "
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+          <h4 class="modal-title" id="mySmallModalLabel">
+            Delete
+            {{
+              selectedDataThings.length === 1
+                ? "photo"
+                : `${selectedDataThings.length} photos`
+            }}
+          </h4>
+        </div>
+        <div class="modal-body">Are you sure you want to delete things?</div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-default"
+            @click="onToggleModal('things-modal-delete')"
+            :disabled="isLoadingDelete"
+          >
+            Close
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            @click="onDeleteThings()"
+            :disabled="isLoadingDelete"
+          >
+            <i
+              v-if="isLoadingDelete"
+              class="fa-duotone fa-solid fa-spinner fa-spin-pulse"
+            ></i>
+            <span v-else>Sure</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <div
+    :class="`modal fade in`"
+    tabindex="-1"
+    role="dialog"
+    :style="`${
+      isOpenOption.find((item) => item === 'things-modal-main')
+        ? 'display: block'
+        : ''
+    }`"
+  >
+    <div class="modal-dialog modal-sm" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button
+            type="button"
+            class="close"
+            @click="isLoadingMain ? null : onToggleModal('things-modal-main')"
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+          <h4 class="modal-title" id="mySmallModalLabel">
+            Delete
+            {{
+              selectedDataThings.length === 1
+                ? "photo"
+                : `${selectedDataThings.length} photos`
+            }}
+          </h4>
+        </div>
+        <div class="modal-body">Are you sure you want to it default?</div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-default"
+            @click="onToggleModal('things-modal-main')"
+            :disabled="isLoadingMain"
+          >
+            Close
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            @click="onMainThings()"
+            :disabled="isLoadingMain"
+          >
+            <i
+              v-if="isLoadingMain"
+              class="fa-duotone fa-solid fa-spinner fa-spin-pulse"
+            ></i>
+            <span v-else>Sure</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+
+  <div v-if="isOpenOption.length > 0" class="modal-backdrop fade in"></div>
 </template>
+
+<style lang="scss" scoped>
+.t-parent {
+  position: relative;
+  cursor: pointer;
+}
+.selected-check {
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.5);
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>

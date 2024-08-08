@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { RouterLink } from "vue-router";
+import { ref, watch } from "vue";
+import { RouterLink, useRoute } from "vue-router";
+import { useMediaDevice } from "./hooks/useMediaDevice";
 
 const fullscreen = ref(false);
+const route = useRoute();
+const { onCloseCamera } = useMediaDevice();
 
 const toggleFullScreen = () => {
   if (!document.fullscreenElement) {
@@ -13,6 +16,10 @@ const toggleFullScreen = () => {
     document.exitFullscreen();
   }
 };
+
+watch(route, () => {
+  onCloseCamera();
+});
 </script>
 
 <template>
@@ -38,9 +45,9 @@ const toggleFullScreen = () => {
         </li>
         <li
           role="presentation"
-          :class="`${$route.path === '/about' ? 'active' : ''}`"
+          :class="`${$route.path === '/activity' ? 'active' : ''}`"
         >
-          <RouterLink to="/about">About</RouterLink>
+          <RouterLink to="/activity">Activity</RouterLink>
         </li>
       </ul>
       <button class="btn btn-default" @click="toggleFullScreen()">

@@ -5,11 +5,15 @@ import { expandJSON } from "src/helpers/helpers";
 import { onFetch } from "src/helpers/lazyFetch";
 import { onMounted, Ref, ref } from "vue";
 import Properties from "../Properties/Properties.vue";
+import { useMediaDevice } from "src/hooks/useMediaDevice";
 
 interface IDataThing {
   name: string;
   uid: string;
   prefs: string[];
+  photo?: {
+    filename: string;
+  };
 }
 
 const editSubmit: Ref<HTMLButtonElement | null> = ref(null);
@@ -22,21 +26,9 @@ const breadCrumb: Ref<IDataThing[]> = ref([]);
 const dataThings: Ref<IDataThing[]> = ref([]);
 const lastMouseDown: Ref<number> = ref(0);
 const selectedDataThings: Ref<IDataThing[]> = ref([]);
-const onMouseDown = (data: IDataThing, e: MouseEvent) => {
-  lastMouseDown.value = new Date().getTime();
 
-  if (e.ctrlKey) {
-    let ls = [...selectedDataThings.value];
-    if (!!ls.find((item) => item === data)) {
-      ls = [...ls.filter((item) => item !== data)];
-    } else {
-      ls = [...ls, data];
-    }
-    selectedDataThings.value = ls;
-  } else {
-    selectedDataThings.value = [data];
-  }
-};
+const { onCloseCamera } = useMediaDevice();
+
 const onToggleModal = (value: string) => {
   let ls = [...isOpenOption.value];
   if (!!ls.find((item) => item === value)) {
@@ -52,6 +44,7 @@ const onToggleModal = (value: string) => {
       document.body.classList.add("modal-open");
     }
   }
+  onCloseCamera();
   isOpenOption.value = ls;
 };
 
@@ -61,12 +54,41 @@ const onToggleModal = (value: string) => {
 //   isOpenOption.value = ls;
 // };
 
+const onMouseDown = (data: IDataThing, e: MouseEvent) => {
+  lastMouseDown.value = new Date().getTime();
+
+  if (e.ctrlKey) {
+    let ls = [...selectedDataThings.value];
+    if (!!ls.find((item) => item === data)) {
+      ls = [...ls.filter((item) => item !== data)];
+    } else {
+      ls = [...ls, data];
+    }
+    selectedDataThings.value = ls;
+  } else {
+    selectedDataThings.value = [data];
+  }
+};
+
 const onMouseUp = (data: IDataThing) => {
   if (new Date().getTime() - lastMouseDown.value >= 500) {
     onToggleModal("things-option");
     // selectedDataThings.value = [data];
   }
 };
+
+const onDblClick = (data: IDataThing) => {
+  if (data.prefs.find((item) => item === "storage")) {
+    selectedDataThings.value = [];
+    breadCrumb.value = [...breadCrumb.value, data];
+    return childFetch(data.uid);
+  } else {
+    selectedDataThings.value = [data];
+    // onToggleModal("things-option");
+    onToggleModal("things-modal-properties");
+  }
+};
+
 const onDeleteThings = () => {
   onFetch({
     url: `/api/v1/things`,
@@ -110,18 +132,6 @@ const childFetch = (uid: string) => {
       isLoading.value = false;
     },
   });
-};
-
-const onDblClick = (data: IDataThing) => {
-  if (data.prefs.find((item) => item === "storage")) {
-    selectedDataThings.value = [];
-    breadCrumb.value = [...breadCrumb.value, data];
-    return childFetch(data.uid);
-  } else {
-    selectedDataThings.value = [data];
-    // onToggleModal("things-option");
-    onToggleModal("things-modal-properties");
-  }
 };
 
 const onGetThings = () =>
@@ -320,10 +330,19 @@ const onBreadCrumb = (key: number) => {
       >
         <div
           class="panel-body"
-          style="display: flex; align-items: center; justify-content: center"
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 12rem;
+          "
         >
-          <div class="" style="height: 12rem"></div>
-          <i class="fa-solid fa-circle-info"></i>
+          <img
+            v-if="!!item.photo"
+            :src="`/uploads/${item.photo.filename}`"
+            style="width: 100%"
+          />
+          <i v-else class="fa-solid fa-circle-info"></i>
         </div>
         <div class="panel-footer">
           <h4 class="panel-title">
@@ -555,7 +574,6 @@ const onBreadCrumb = (key: number) => {
           @onClose="() => onToggleModal('things-modal-properties')"
           @onReload="
             () => {
-              onToggleModal('things-option');
               if (breadCrumb.length === 0) {
                 onGetThings();
               } else {

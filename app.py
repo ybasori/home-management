@@ -5,19 +5,23 @@ import os
 from main.models import db
 from main.controllers.welcome import welcome
 from main.controllers.api.v1.things import things
-from werkzeug.utils import secure_filename
+from main.controllers.api.v1.upload import upload
 
-UPLOAD_FOLDER = '/path/to/the/uploads'
 
 app = Flask(__name__, static_folder="dist", static_url_path="/static", template_folder="main/templates")
 basedir = os.path.abspath(os.path.dirname(__file__))
 
+app.add_url_rule(
+    "/uploads/<name>", endpoint="download_file", build_only=True
+)
+
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///"+os.path.join(basedir, "home-management.sqlite")
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = os.path.join(basedir, "storage")
 
 db.init_app(app)
 migrate = Migrate(app, db)
 
+upload(app)
 welcome(app)
 things(app)
 

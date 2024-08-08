@@ -9,11 +9,17 @@ interface IDataThing {
   uid: string;
   parent_uid?: string;
   prefs: string[];
+  photo?: {
+    filename: string;
+  };
 }
 interface IInitDataThing {
   name?: string;
   uid?: string;
   parent_uid?: string;
+  photo?: {
+    filename: string;
+  };
 }
 
 const emit = defineEmits<{
