@@ -34,7 +34,7 @@ const props = defineProps<{
   noActionButton: boolean;
 }>();
 
-const { inputKeyboard } = useKeyboard();
+const keyboard = useKeyboard();
 
 const validation = () => {
   return yup.object().shape({
@@ -111,6 +111,14 @@ const onSubmit = () => {
   }
 };
 
+const activateKeyboard = (value: "name") => {
+  if (!keyboard.show) {
+    fieldKeyboard.value = value;
+    keyboard.setInput("");
+  }
+  keyboard.setShow(!keyboard.show);
+};
+
 watch(
   () => props?.initialValues,
   (newValues, oldValues) => {
@@ -150,9 +158,8 @@ watch(
 );
 
 watch(
-  () => inputKeyboard,
+  () => keyboard.input,
   (newValues) => {
-    console.log("newValues", newValues);
     values.value = { ...values.value, [fieldKeyboard.value]: newValues };
   }
 );
@@ -170,9 +177,7 @@ watch(
       <div
         :class="`form-group ${!!errValues.name ? 'has-error has-danger' : ''}`"
       >
-        <label class="col-sm-2 control-label"
-          >Name {{ inputKeyboard }} zzz</label
-        >
+        <label class="col-sm-2 control-label">Name</label>
         <div class="col-sm-10">
           <div class="input-group">
             <input
@@ -185,9 +190,9 @@ watch(
               <button
                 class="btn btn-default"
                 type="button"
-                @click="fieldKeyboard = 'name'"
+                @click="activateKeyboard('name')"
               >
-                Go!
+                <i class="fa-regular fa-keyboard"></i>
               </button>
             </span>
           </div>

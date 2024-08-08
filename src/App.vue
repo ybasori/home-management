@@ -3,10 +3,12 @@ import { ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import { useMediaDevice } from "./hooks/useMediaDevice";
 import Keyboard from "src/components/atoms/Keyboard/Keyboard.vue";
+import { useKeyboard } from "./hooks/useKeyboard";
 
 const fullscreen = ref(false);
 const route = useRoute();
 const { onCloseCamera } = useMediaDevice();
+const kb = useKeyboard();
 
 const toggleFullScreen = () => {
   if (!document.fullscreenElement) {
@@ -60,7 +62,12 @@ watch(route, () => {
       </button>
     </div>
   </div>
-  <Keyboard></Keyboard>
+  <div v-if="kb.show" style="position: fixed; bottom: 0; width: 100%">
+    <button class="btn btn-default" type="button" @click="kb.setShow(false)">
+      hide
+    </button>
+    <Keyboard></Keyboard>
+  </div>
 </template>
 
 <style lang="scss" scoped>

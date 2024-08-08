@@ -2,15 +2,21 @@ import { defineStore } from "pinia";
 import { ref, Ref } from "vue";
 
 export const useKeyboard = defineStore("keyboardset", () => {
-  const inputKeyboard: Ref<string> = ref("");
+  const show = ref(false);
 
-  async function setInputKeyboard(value: string) {
-    console.log(value);
-    inputKeyboard.value = value;
-  }
+  const input: Ref<string> = ref("");
+
+  const setInput = (value: string) => {
+    input.value = value;
+  };
+  const setShow = (value: boolean) => {
+    show.value = value;
+  };
 
   return {
-    setInputKeyboard,
-    inputKeyboard,
+    setInput,
+    input,
+    setShow,
+    show,
   };
 });

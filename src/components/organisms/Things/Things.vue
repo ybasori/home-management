@@ -6,6 +6,7 @@ import { onFetch } from "src/helpers/lazyFetch";
 import { onMounted, Ref, ref } from "vue";
 import Properties from "../Properties/Properties.vue";
 import { useMediaDevice } from "src/hooks/useMediaDevice";
+import { useKeyboard } from "src/hooks/useKeyboard";
 
 interface IDataThing {
   name: string;
