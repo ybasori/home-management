@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { expandJSON } from "src/helpers/helpers";
 import { onFetch } from "src/helpers/lazyFetch";
+import { useKeyboard } from "src/hooks/useKeyboard";
 import { ref, Ref, watch } from "vue";
 import * as yup from "yup";
 
@@ -33,6 +34,8 @@ const props = defineProps<{
   noActionButton: boolean;
 }>();
 
+const { inputKeyboard } = useKeyboard();
+
 const validation = () => {
   return yup.object().shape({
     name: yup.string().required("Name is required"),
@@ -49,6 +52,7 @@ const errValues: Ref<{ [key: string]: string }> = ref({});
 const isValid = ref(false);
 const isLoading = ref(false);
 const errSubmit: Ref<null | string> = ref(null);
+const fieldKeyboard: Ref<"name"> = ref("name");
 
 const onReset = () => {
   values.value = {
@@ -144,6 +148,14 @@ watch(
   },
   { deep: true }
 );
+
+watch(
+  () => inputKeyboard,
+  (newValues) => {
+    console.log("newValues", newValues);
+    values.value = { ...values.value, [fieldKeyboard.value]: newValues };
+  }
+);
 </script>
 
 <template>
@@ -158,14 +170,27 @@ watch(
       <div
         :class="`form-group ${!!errValues.name ? 'has-error has-danger' : ''}`"
       >
-        <label class="col-sm-2 control-label">Name</label>
+        <label class="col-sm-2 control-label"
+          >Name {{ inputKeyboard }} zzz</label
+        >
         <div class="col-sm-10">
-          <input
-            type="text"
-            class="form-control"
-            placeholder="Name"
-            v-model="values.name"
-          />
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control input-keyboard"
+              placeholder="Name"
+              v-model="values.name"
+            />
+            <span class="input-group-btn">
+              <button
+                class="btn btn-default"
+                type="button"
+                @click="fieldKeyboard = 'name'"
+              >
+                Go!
+              </button>
+            </span>
+          </div>
           <div class="help-block with-errors">
             <ul v-if="!!errValues.name" class="list-unstyled">
               <li>{{ errValues.name }}</li>

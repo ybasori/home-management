@@ -2,6 +2,7 @@
 import { ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import { useMediaDevice } from "./hooks/useMediaDevice";
+import Keyboard from "src/components/atoms/Keyboard/Keyboard.vue";
 
 const fullscreen = ref(false);
 const route = useRoute();
@@ -59,6 +60,7 @@ watch(route, () => {
       </button>
     </div>
   </div>
+  <Keyboard></Keyboard>
 </template>
 
 <style lang="scss" scoped>
