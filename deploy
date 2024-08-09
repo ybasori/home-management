@@ -23,3 +23,5 @@ deactivate
 sudo service apache2 restart
 
 sudo systemctl reload apache2
+
+xdg-open http://localhost
