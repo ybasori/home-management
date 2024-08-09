@@ -94,8 +94,8 @@ watch(route, () => {
       tabindex="-1"
       role="dialog"
       :style="`${
-        isOpenOption.find((item) => item === 'settings') ? 'display: block' : ''
-      }`"
+        isOpenOption.find((item) => item === 'settings') ? 'display: flex' : ''
+      }; flex-direction: column`"
     >
       <div class="modal-dialog modal-sm" role="document">
         <div

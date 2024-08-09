@@ -27,6 +27,8 @@ const breadCrumb: Ref<IDataThing[]> = ref([]);
 const dataThings: Ref<IDataThing[]> = ref([]);
 const lastMouseDown: Ref<number> = ref(0);
 const selectedDataThings: Ref<IDataThing[]> = ref([]);
+const breadCrumbMove: Ref<IDataThing[]> = ref([]);
+const dataThingsMove: Ref<IDataThing[]> = ref([]);
 
 const { onCloseCamera } = useMediaDevice();
 
@@ -47,6 +49,10 @@ const onToggleModal = (value: string) => {
   }
   onCloseCamera();
   isOpenOption.value = ls;
+  if (value === "things-modal-move") {
+    dataThingsMove.value = dataThings.value;
+    breadCrumbMove.value = breadCrumb.value;
+  }
 };
 
 // const onBackdrop = () => {
@@ -82,6 +88,7 @@ const onDblClick = (data: IDataThing) => {
   if (data.prefs.find((item) => item === "storage")) {
     selectedDataThings.value = [];
     breadCrumb.value = [...breadCrumb.value, data];
+    breadCrumbMove.value = [...breadCrumbMove.value, data];
     return childFetch(data.uid);
   } else {
     selectedDataThings.value = [data];
@@ -118,16 +125,24 @@ const onDeleteThings = () => {
   });
 };
 
-const childFetch = (uid: string) => {
+const childFetch = (uid: string, menu = "") => {
   return onFetch({
     url: `/api/v1/things/${uid}`,
     method: "GET",
     beforeSend() {
-      isLoading.value = true;
+      if (menu === "") {
+        isLoading.value = true;
+      }
     },
     success(data) {
       isLoading.value = false;
-      dataThings.value = (data as { data: IDataThing[] }).data;
+      if (menu === "") {
+        dataThings.value = (data as { data: IDataThing[] }).data;
+        dataThingsMove.value = (data as { data: IDataThing[] }).data;
+      }
+      if (menu === "move") {
+        dataThingsMove.value = (data as { data: IDataThing[] }).data;
+      }
     },
     error() {
       isLoading.value = false;
@@ -135,16 +150,24 @@ const childFetch = (uid: string) => {
   });
 };
 
-const onGetThings = () =>
+const onGetThings = (menu = "") =>
   onFetch({
     url: "/api/v1/things",
     method: "GET",
     beforeSend() {
-      isLoading.value = true;
+      if (menu === "") {
+        isLoading.value = true;
+      }
     },
     success(data) {
       isLoading.value = false;
-      dataThings.value = (data as { data: IDataThing[] }).data;
+      if (menu === "") {
+        dataThings.value = (data as { data: IDataThing[] }).data;
+        dataThingsMove.value = (data as { data: IDataThing[] }).data;
+      }
+      if (menu === "move") {
+        dataThingsMove.value = (data as { data: IDataThing[] }).data;
+      }
     },
     error() {
       isLoading.value = false;
@@ -161,6 +184,48 @@ const drag = (ev: DragEvent, item: IDataThing) => {
 
 const allowDrop = (ev: DragEvent) => {
   ev.preventDefault();
+};
+
+const onMove = (item: IDataThing | null) => {
+  if (selectedDataThings.value.length === 1) {
+    if (
+      (!!item &&
+        selectedDataThings.value[0].uid !== item?.uid &&
+        !!item?.prefs.find((item) => item === "storage")) ||
+      !item
+    ) {
+      const formd = new FormData();
+      const bd = expandJSON({
+        ...selectedDataThings.value[0],
+        parent_uid: item?.uid ?? null,
+      });
+      for (const key in bd) {
+        formd.append(bd[key].label, bd[key].value as string | Blob);
+      }
+      onFetch({
+        url: "/api/v1/things/" + selectedDataThings.value[0].uid,
+        method: "PUT",
+        data: formd,
+        beforeSend() {
+          isLoadingEdit.value = true;
+        },
+        success() {
+          isLoadingEdit.value = false;
+          // dataThings.value = (data as { data: IDataThing[] }).data;
+
+          dataThings.value = [
+            ...dataThings.value.filter(
+              (item) => item.uid !== selectedDataThings.value[0].uid
+            ),
+          ];
+          onToggleModal("things-modal-move");
+        },
+        error() {
+          isLoadingEdit.value = false;
+        },
+      });
+    }
+  }
 };
 
 const drop = (ev: DragEvent, item: IDataThing | null) => {
@@ -203,16 +268,29 @@ const drop = (ev: DragEvent, item: IDataThing | null) => {
   }
 };
 
-const onBreadCrumbHome = () => {
-  breadCrumb.value = [];
-  selectedDataThings.value = [];
-  return onGetThings();
+const onBreadCrumbHome = (menu = "") => {
+  if (menu === "") {
+    breadCrumb.value = [];
+    selectedDataThings.value = [];
+  }
+  if (menu === "move") {
+    breadCrumbMove.value = [];
+  }
+  return onGetThings(menu);
 };
-const onBreadCrumb = (key: number) => {
-  breadCrumb.value = breadCrumb.value.filter((_, i) => i <= key);
-
-  selectedDataThings.value = [];
-  return childFetch(breadCrumb.value[key].uid);
+const onBreadCrumb = (key: number, menu = "") => {
+  if (menu === "") {
+    breadCrumb.value = breadCrumb.value.filter((_, i) => i <= key);
+    breadCrumbMove.value = breadCrumb.value;
+    selectedDataThings.value = [];
+    childFetch(breadCrumb.value[key].uid);
+  }
+  if (menu === "move") {
+    breadCrumbMove.value = breadCrumbMove.value.filter((_, i) => i <= key);
+    console.log(breadCrumbMove.value, key);
+    childFetch(breadCrumbMove.value[key].uid, menu);
+  }
+  return;
 };
 </script>
 
@@ -303,6 +381,27 @@ const onBreadCrumb = (key: number) => {
       >
         <i class="fa-regular fa-trash-can"></i>
       </button>
+      <button
+        v-if="selectedDataThings.length === 1"
+        class="btn btn-default"
+        @click="onToggleModal('things-modal-edit')"
+      >
+        <i class="fa-regular fa-pen-to-square"></i>
+      </button>
+      <button
+        v-if="selectedDataThings.length === 1"
+        class="btn btn-default"
+        @click="onToggleModal('things-modal-properties')"
+      >
+        <i class="fa-solid fa-sliders"></i>
+      </button>
+      <button
+        v-if="selectedDataThings.length === 1"
+        class="btn btn-default"
+        @click="onToggleModal('things-modal-move')"
+      >
+        <i class="fa-regular fa-share-from-square"></i>
+      </button>
     </div>
   </div>
   <div class="row" style="overflow: auto">
@@ -310,7 +409,7 @@ const onBreadCrumb = (key: number) => {
       <i class="fa-duotone fa-solid fa-spinner fa-spin-pulse"></i>
     </div>
     <div
-      v-else="!isLoading"
+      v-else
       v-for="(item, key) in dataThings"
       class="col-xs-4"
       v-bind:key="key"
@@ -360,11 +459,11 @@ const onBreadCrumb = (key: number) => {
     role="dialog"
     :style="`${
       isOpenOption.find((item) => item === 'things-option')
-        ? 'display: block'
+        ? 'display: flex'
         : ''
-    }`"
+    }; flex-direction: column`"
   >
-    <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-dialog modal-sm" role="document" style="margin-top: auto">
       <div
         class="btn-group-vertical btn-block"
         role="group"
@@ -411,11 +510,11 @@ const onBreadCrumb = (key: number) => {
     role="dialog"
     :style="`${
       isOpenOption.find((item) => item === 'things-modal-delete')
-        ? 'display: block'
+        ? 'display: flex'
         : ''
-    }`"
+    }; flex-direction: column`"
   >
-    <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-dialog modal-sm" role="document" style="margin-top: auto">
       <div class="modal-content">
         <div class="modal-header">
           <button
@@ -470,11 +569,11 @@ const onBreadCrumb = (key: number) => {
     role="dialog"
     :style="`${
       isOpenOption.find((item) => item === 'things-modal-edit')
-        ? 'display: block'
+        ? 'display: flex'
         : ''
-    }`"
+    }; flex-direction: column`"
   >
-    <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-dialog modal-sm" role="document" style="margin-top: auto">
       <div class="modal-content">
         <div class="modal-header">
           <button
@@ -546,11 +645,11 @@ const onBreadCrumb = (key: number) => {
     role="dialog"
     :style="`${
       isOpenOption.find((item) => item === 'things-modal-properties')
-        ? 'display: block'
+        ? 'display: flex'
         : ''
-    }`"
+    }; flex-direction: column`"
   >
-    <div class="modal-dialog modal-md" role="document">
+    <div class="modal-dialog modal-md" role="document" style="margin-top: auto">
       <div class="modal-content">
         <div class="modal-header">
           <button
@@ -588,6 +687,71 @@ const onBreadCrumb = (key: number) => {
 
     <!-- /.modal-dialog -->
   </div>
+
+  <div
+    :class="`modal fade in things-modal-move`"
+    tabindex="-1"
+    role="dialog"
+    :style="`${
+      isOpenOption.find((item) => item === 'things-modal-move')
+        ? 'display: flex'
+        : ''
+    }; flex-direction: column`"
+  >
+    <div class="modal-dialog modal-sm" role="document" style="margin-top: auto">
+      <div
+        v-if="selectedDataThings.length > 0"
+        class="btn-group-vertical btn-block"
+        role="group"
+        aria-label="Vertical button group"
+      >
+        <button
+          v-if="breadCrumbMove.length > 0"
+          type="button"
+          class="btn btn-default"
+          @click="
+            breadCrumbMove.length === 1
+              ? onBreadCrumbHome('move')
+              : onBreadCrumb(breadCrumbMove.length - 2, 'move')
+          "
+        >
+          ...
+        </button>
+        <button
+          v-for="(dt, key) in dataThingsMove
+            .filter((item) => !!item.prefs.find((sbu) => sbu === 'storage'))
+            .filter((item) => item.uid !== selectedDataThings[0].uid)"
+          type="button"
+          class="btn btn-default"
+          v-bind:key="key"
+          @click="
+            () => {
+              breadCrumbMove = [...breadCrumbMove, dt];
+              childFetch(dt.uid, 'move');
+            }
+          "
+        >
+          {{ dt.name }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-default"
+          @click="onMove(breadCrumbMove[breadCrumbMove.length - 1])"
+        >
+          Here
+        </button>
+        <button
+          type="button"
+          class="btn btn-default"
+          @click="onToggleModal('things-modal-move')"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <!-- /.modal -->
   <div v-if="isOpenOption.length > 0" class="modal-backdrop fade in"></div>
 </template>
 
