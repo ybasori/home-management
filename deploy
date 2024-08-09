@@ -10,6 +10,8 @@ npm run build
 
 source venv/bin/activate
 
+pip install -r requirements.txt
+
 flask db stamp head
 
 flask db migrate
@@ -20,4 +22,4 @@ deactivate
 
 sudo service apache2 restart
 
-sudo sytemctl reload apache2
+sudo systemctl reload apache2
