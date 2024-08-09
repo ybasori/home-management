@@ -101,7 +101,11 @@ onMounted(() => {
         isOpenOption.find((item) => item === 'settings') ? 'display: flex' : ''
       }; flex-direction: column`"
     >
-      <div class="modal-dialog modal-sm" role="document">
+      <div
+        class="modal-dialog modal-sm"
+        role="document"
+        style="margin-top: auto"
+      >
         <div
           class="btn-group-vertical btn-block"
           role="group"
