@@ -17,3 +17,7 @@ flask db migrate
 flask db upgrade
 
 deactivate
+
+sudo service apache2 restart
+
+sudo sytemctl reload apache2
