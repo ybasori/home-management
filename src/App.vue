@@ -4,11 +4,33 @@ import { RouterLink, useRoute } from "vue-router";
 import { useMediaDevice } from "./hooks/useMediaDevice";
 import Keyboard from "src/components/atoms/Keyboard/Keyboard.vue";
 import { useKeyboard } from "./hooks/useKeyboard";
+import { Ref } from "vue";
 
 const fullscreen = ref(false);
 const route = useRoute();
 const { onCloseCamera } = useMediaDevice();
 const kb = useKeyboard();
+const isOpenOption: Ref<string[]> = ref([]);
+const rotate = ref(0);
+
+const onToggleModal = (value: string) => {
+  let ls = [...isOpenOption.value];
+  if (!!ls.find((item) => item === value)) {
+    ls = [...ls.filter((item) => item !== value)];
+  } else {
+    ls = [...ls, value];
+  }
+
+  if (ls.length <= 0) {
+    document.body.classList.remove("modal-open");
+  } else {
+    if (!document.body.classList.contains("modal-option")) {
+      document.body.classList.add("modal-open");
+    }
+  }
+  onCloseCamera();
+  isOpenOption.value = ls;
+};
 
 const toggleFullScreen = () => {
   if (!document.fullscreenElement) {
@@ -27,12 +49,14 @@ watch(route, () => {
 
 <template>
   <div
-    class="container-fluid wrapper"
+    class="container-fluid"
     style="
       display: flex;
       flex-direction: column;
       height: 100vh;
       padding-top: 2rem;
+      max-width: 500px;
+      width: 100%;
     "
   >
     <RouterView />
@@ -53,26 +77,55 @@ watch(route, () => {
           <RouterLink to="/activity">Activity</RouterLink>
         </li>
       </ul>
-      <button class="btn btn-default" @click="toggleFullScreen()">
-        <i
-          v-if="fullscreen"
-          class="fa-solid fa-up-right-and-down-left-from-center"
-        ></i>
-        <i v-else class="fa-solid fa-down-left-and-up-right-to-center"></i>
+      <button class="btn btn-default" @click="onToggleModal('settings')">
+        <i class="fa-solid fa-gear"></i>
       </button>
     </div>
-  </div>
-  <div v-if="kb.show" style="position: fixed; bottom: 0; width: 100%">
-    <button class="btn btn-default" type="button" @click="kb.setShow(false)">
-      hide
-    </button>
-    <Keyboard></Keyboard>
+
+    <div v-if="kb.show" style="position: fixed; bottom: 0; width: 100%">
+      <button class="btn btn-default" type="button" @click="kb.setShow(false)">
+        hide
+      </button>
+      <Keyboard></Keyboard>
+    </div>
+
+    <div
+      :class="`modal fade in`"
+      tabindex="-1"
+      role="dialog"
+      :style="`${
+        isOpenOption.find((item) => item === 'settings') ? 'display: block' : ''
+      }`"
+    >
+      <div class="modal-dialog modal-sm" role="document">
+        <div
+          class="btn-group-vertical btn-block"
+          role="group"
+          aria-label="Vertical button group"
+        >
+          <button
+            type="button"
+            class="btn btn-default"
+            @click="toggleFullScreen()"
+          >
+            Fullscreen
+          </button>
+          <!-- <button type="button" class="btn btn-default" @click="rotate += 1">
+            Rotate 90<sup>o</sup><i class="fa-solid fa-rotate-right"></i>
+          </button> -->
+          <button
+            type="button"
+            class="btn btn-default"
+            @click="onToggleModal('settings')"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+      <!-- /.modal-dialog -->
+    </div>
+
+    <!-- /.modal -->
+    <div v-if="isOpenOption.length > 0" class="modal-backdrop fade in"></div>
   </div>
 </template>
-
-<style lang="scss" scoped>
-.wrapper {
-  max-width: 500px;
-  width: 100%;
-}
-</style>
