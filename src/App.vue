@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import { useMediaDevice } from "./hooks/useMediaDevice";
 import Keyboard from "src/components/atoms/Keyboard/Keyboard.vue";
@@ -44,6 +44,10 @@ const toggleFullScreen = () => {
 
 watch(route, () => {
   onCloseCamera();
+});
+
+onMounted(() => {
+  toggleFullScreen();
 });
 </script>
 
