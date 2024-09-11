@@ -253,42 +253,49 @@ const mySubmitButton: Ref<HTMLButtonElement | null> = ref(null);
 
 const onSubmit = (e: Event) => {
   e.preventDefault();
-  onFetchAllAsync(wbvtInstance)({
-    url: API_PREFERENCES,
-    path: props.initialValues?.prefs.map((item) => item.id),
-    method: "DELETE",
-    beforeSend: () => {
-      isLoading.value = true;
-      emit("setIsLoading", true);
-    },
-    success: () => {
-      onFetchAllAsync(wbvtInstance)({
-        url: API_PREFERENCES,
-        method: "POST",
-        data: values.value.prefs.map((item) => ({
-          name: item,
-          things_id: props.initialValues?.id,
-        })),
-        beforeSend: () => {
-          isLoading.value = true;
-          emit("setIsLoading", true);
-        },
-        success: () => {
-          isLoading.value = false;
-          emit("setIsLoading", false);
-          emit("onReload");
-        },
-        error: () => {
-          isLoading.value = false;
-          emit("setIsLoading", false);
-        },
-      });
-    },
-    error: () => {
-      isLoading.value = false;
-      emit("setIsLoading", false);
-    },
-  });
+  onFetchAllAsync(wbvtInstance)(
+    props.initialValues?.prefs.map((item) => ({
+      url: API_PREFERENCES + "/" + item.id,
+      method: "DELETE",
+    })) ?? [],
+    {
+      beforeSend: () => {
+        isLoading.value = true;
+        emit("setIsLoading", true);
+      },
+      success: () => {
+        onFetchAllAsync(wbvtInstance)(
+          values.value.prefs.map((item) => ({
+            url: API_PREFERENCES,
+            method: "POST",
+            data: {
+              name: item,
+              things_id: props.initialValues?.id,
+            },
+          })) ?? [],
+          {
+            beforeSend: () => {
+              isLoading.value = true;
+              emit("setIsLoading", true);
+            },
+            success: () => {
+              isLoading.value = false;
+              emit("setIsLoading", false);
+              emit("onReload");
+            },
+            error: () => {
+              isLoading.value = false;
+              emit("setIsLoading", false);
+            },
+          }
+        );
+      },
+      error: () => {
+        isLoading.value = false;
+        emit("setIsLoading", false);
+      },
+    }
+  );
 };
 
 watch(

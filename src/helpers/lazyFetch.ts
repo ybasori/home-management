@@ -48,72 +48,56 @@ export const onFetch = (axiosInstance: AxiosInstance) => {
 
 export const onFetchAllAsync =
   (axiosInstance: AxiosInstance) =>
-  ({
-    url,
-    method = "GET",
-    path: paths = [],
-    data: datas = [],
-    type,
-    beforeSend = () => null,
-    success,
-    error,
-  }: {
-    url: string;
-    path?: string[];
-    method?: "GET" | "POST" | "PUT" | "DELETE";
-    data?: unknown[];
-    type?: "formdata" | "json";
-    beforeSend?: () => void;
-    success: (
-      response: {
-        config: { params: any };
-        data: {
-          message: string;
-          result: { data: any; total: number } | any;
-        };
-      }[]
-    ) => void;
-    error: (xhr: any) => void;
-  }) => {
+  (
+    config: {
+      url: string;
+      path?: string;
+      method?: "GET" | "POST" | "PUT" | "DELETE";
+      data?: unknown;
+      type?: "formdata" | "json";
+    }[],
+    {
+      beforeSend = () => null,
+      success,
+      error,
+    }: {
+      beforeSend?: () => void;
+      success: (
+        response: {
+          config: { params: any };
+          data: {
+            message: string;
+            result: { data: any; total: number } | any;
+          };
+        }[]
+      ) => void;
+      error: (xhr: any) => void;
+    }
+  ) => {
     beforeSend();
     Promise.all(
-      (Array.isArray(datas) ? datas : []).length > 0
-        ? (Array.isArray(datas) ? datas : []).map((item, index) => {
-            const form = new FormData();
-            const dt = expandJSON(item as { [key: string]: string | Blob });
-            for (let i in dt) {
-              form.append(dt[i].label, dt[i].value);
-            }
-            return axiosInstance({
-              method,
-              url:
-                url +
-                (paths.length > 0 && paths.length === datas.length
-                  ? `/${paths[index]}`
-                  : ""),
-              headers: {
-                "Content-Type":
-                  type === "json" ? "application/json" : "multipart/form-data",
-              },
-              ...(method === "GET"
-                ? {
-                    params: item,
-                  }
-                : { data: type === "json" ? item : form }),
-            });
-          })
-        : (Array.isArray(paths) ? paths : []).length > 0
-        ? (Array.isArray(paths) ? paths : []).map((item) => {
-            return axiosInstance({
-              method,
-              url: url + `/${item}`,
-              headers: {
-                "Content-Type":
-                  type === "json" ? "application/json" : "multipart/form-data",
-              },
-            });
-          })
-        : []
+      (Array.isArray(config) ? config : []).map((item) => {
+        const form = new FormData();
+        if (item.data) {
+          const dt = expandJSON(item.data as { [key: string]: string | Blob });
+          for (let i in dt) {
+            form.append(dt[i].label, dt[i].value);
+          }
+        }
+        return axiosInstance({
+          method: item.method ?? "GET",
+          url: item.url + (item.path ?? ""),
+          headers: {
+            "Content-Type":
+              item.type === "json" ? "application/json" : "multipart/form-data",
+          },
+          ...((item.method ?? "GET") === "GET"
+            ? {
+                params: item.data,
+              }
+            : { data: item.type === "json" ? item.data : form }),
+        });
+      })
     )
       .then((response) => {
         success(
@@ -126,6 +110,7 @@ export const onFetchAllAsync =
         );
       })
       .catch((err) => {
+        console.log(err);
         error(err);
       });
   };

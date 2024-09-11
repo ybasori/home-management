@@ -144,74 +144,77 @@ const childFetch = (id: string, menu = "") => {
     success(data) {
       let ntap = (data as unknown as { result: { data: IDataThing[] } }).result
         .data;
-      onFetchAllAsync(wbvtInstance)({
-        url: API_PREFERENCES,
-        data: ntap.map((item) => ({
-          filter: {
-            things_id: item.id,
+      onFetchAllAsync(wbvtInstance)(
+        ntap.map((item) => ({
+          url: API_PREFERENCES,
+          data: {
+            filter: { things_id: item.id },
           },
         })),
-        beforeSend() {
-          return null;
-        },
-        success(resp) {
-          resp.forEach((item) => {
-            ntap.forEach((sub, i) => {
-              if (
-                !!item.data.result &&
-                sub.id === item.config.params.filter.things_id
-              ) {
-                ntap[i].prefs = [...item.data.result.data];
-              }
-            });
-          });
-          onFetchAllAsync(wbvtInstance)({
-            url: API_PHOTOS,
-            path: ntap
-              .filter((item) => item.photo_id !== null)
-              .map((item) => `${item.photo_id}`),
-            beforeSend() {
-              return null;
-            },
-            success(resp) {
-              isLoading.value = false;
-              resp.forEach((item) => {
-                ntap.forEach((sub, i) => {
-                  if (
-                    item.data.result !== null &&
-                    sub.id === item.data.result.things_id
-                  ) {
-                    ntap[i].photo = {
-                      url: item.data.result.url,
-                    };
-                  }
-                });
+        {
+          beforeSend() {
+            return null;
+          },
+          success(resp) {
+            resp.forEach((item) => {
+              ntap.forEach((sub, i) => {
+                if (
+                  !!item.data.result &&
+                  sub.id === item.config.params.filter.things_id
+                ) {
+                  ntap[i].prefs = [...item.data.result.data];
+                }
               });
-              if (menu === "") {
-                dataThings.value = ntap;
-                dataThingsMove.value = ntap;
+            });
+            onFetchAllAsync(wbvtInstance)(
+              ntap
+                .filter((item) => item.photo_id !== null)
+                .map((item) => ({ url: API_PHOTOS + `/${item.photo_id}` })),
+              {
+                beforeSend() {
+                  return null;
+                },
+                success(resp) {
+                  isLoading.value = false;
+                  resp.forEach((item) => {
+                    ntap.forEach((sub, i) => {
+                      if (
+                        item.data.result !== null &&
+                        sub.id === item.data.result.things_id
+                      ) {
+                        ntap[i].photo = {
+                          url: item.data.result.url,
+                        };
+                      }
+                    });
+                  });
+                  if (menu === "") {
+                    dataThings.value = ntap;
+                    dataThingsMove.value = ntap;
+                  }
+                  if (menu === "move") {
+                    dataThingsMove.value = ntap;
+                  }
+                },
+                error() {
+                  isLoading.value = false;
+                  if (menu === "") {
+                    dataThings.value = ntap;
+                    dataThingsMove.value = ntap;
+                  }
+                  if (menu === "move") {
+                    dataThingsMove.value = ntap;
+                  }
+                },
               }
-              if (menu === "move") {
-                dataThingsMove.value = ntap;
-              }
-            },
-            error() {
-              isLoading.value = false;
-              if (menu === "") {
-                dataThings.value = ntap;
-                dataThingsMove.value = ntap;
-              }
-              if (menu === "move") {
-                dataThingsMove.value = ntap;
-              }
-            },
-          });
-        },
-        error() {
-          isLoading.value = false;
-          return null;
-        },
-      });
+            );
+          },
+          error() {
+            isLoading.value = false;
+            return null;
+          },
+        }
+      );
     },
     error() {
       isLoading.value = false;
@@ -237,71 +240,78 @@ const onGetThings = (menu = "") =>
     success(data) {
       let ntap = (data as unknown as { result: { data: IDataThing[] } }).result
         .data;
-      onFetchAllAsync(wbvtInstance)({
-        url: API_PREFERENCES,
-        data: ntap.map((item) => ({
-          filter: {
-            things_id: item.id,
+      onFetchAllAsync(wbvtInstance)(
+        ntap.map((item) => ({
+          url: API_PREFERENCES,
+          data: {
+            filter: { things_id: item.id },
           },
         })),
-        beforeSend() {
-          return null;
-        },
-        success(resp) {
-          resp.forEach((item) => {
-            ntap.forEach((sub, i) => {
-              if (sub.id === item.config.params.filter.things_id) {
-                ntap[i].prefs = [...item.data.result.data];
-              }
-            });
-          });
-
-          onFetchAllAsync(wbvtInstance)({
-            url: API_PHOTOS,
-            path: ntap
-              .filter((item) => item.photo_id !== null)
-              .map((item) => `${item.photo_id}`),
-            beforeSend() {
-              return null;
-            },
-            success(resp) {
-              isLoading.value = false;
-              resp.forEach((item) => {
-                ntap.forEach((sub, i) => {
-                  if (
-                    !!item.data.result &&
-                    sub.id === item.data.result.things_id
-                  ) {
-                    ntap[i].photo = {
-                      url: item.data.result.url,
-                    };
-                  }
-                });
+        {
+          beforeSend() {
+            return null;
+          },
+          success(resp) {
+            console.log(resp);
+            resp.forEach((item) => {
+              ntap.forEach((sub, i) => {
+                if (sub.id === item.config.params.filter.things_id) {
+                  ntap[i].prefs = [...item.data.result.data];
+                }
               });
-              if (menu === "") {
-                dataThings.value = ntap;
-                dataThingsMove.value = ntap;
+            });
+
+            onFetchAllAsync(wbvtInstance)(
+              ntap
+                .filter((item) => item.photo_id !== null)
+                .map((item) => ({
+                  url: API_PHOTOS + "/" + item.photo_id,
+                })),
+              {
+                beforeSend() {
+                  return null;
+                },
+                success(resp) {
+                  isLoading.value = false;
+                  console.log(resp);
+                  resp.forEach((item) => {
+                    ntap.forEach((sub, i) => {
+                      if (
+                        !!item.data.result &&
+                        sub.id === item.data.result.things_id
+                      ) {
+                        ntap[i].photo = {
+                          url: item.data.result.url,
+                        };
+                      }
+                    });
+                  });
+                  if (menu === "") {
+                    dataThings.value = ntap;
+                    dataThingsMove.value = ntap;
+                  }
+                  if (menu === "move") {
+                    dataThingsMove.value = ntap;
+                  }
+                },
+                error() {
+                  isLoading.value = false;
+                  if (menu === "") {
+                    dataThings.value = ntap;
+                    dataThingsMove.value = ntap;
+                  }
+                  if (menu === "move") {
+                    dataThingsMove.value = ntap;
+                  }
+                },
               }
-              if (menu === "move") {
-                dataThingsMove.value = ntap;
-              }
-            },
-            error() {
-              isLoading.value = false;
-              if (menu === "") {
-                dataThings.value = ntap;
-                dataThingsMove.value = ntap;
-              }
-              if (menu === "move") {
-                dataThingsMove.value = ntap;
-              }
-            },
-          });
-        },
-        error() {
-          isLoading.value = false;
-        },
-      });
+            );
+          },
+          error() {
+            isLoading.value = false;
+          },
+        }
+      );
     },
     error(err) {
       isLoading.value = false;
