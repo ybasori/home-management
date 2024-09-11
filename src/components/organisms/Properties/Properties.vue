@@ -8,9 +8,9 @@ import { onMounted, Ref, ref, watch } from "vue";
 
 interface IInitDataThing {
   name: string;
-  uid: string;
-  parent_uid?: string;
-  prefs: string[];
+  id: string;
+  parent_id?: string;
+  prefs: { id: string; name: string }[];
 }
 
 const props = defineProps<{

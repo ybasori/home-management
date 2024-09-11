@@ -6,16 +6,18 @@ import { Ref } from "vue";
 import { onFetch } from "src/helpers/lazyFetch";
 import { useMediaDevice } from "src/hooks/useMediaDevice";
 import { expandJSON } from "src/helpers/helpers";
+import { API_DISPLAY_THINGS, API_PHOTOS, API_THINGS } from "src/config/api";
+import { wbvtInstance } from "src/config/axios";
 
 interface IInitDataThing {
   name: string;
-  uid: string;
-  parent_uid?: string;
-  prefs: string[];
+  id: string;
+  parent_id?: string;
+  prefs: { id: string; name: string }[];
 }
 interface IPhotoData {
-  uid: string;
-  filename: string;
+  id: string;
+  url: string;
   description: string;
 }
 
@@ -36,12 +38,17 @@ const isLoadingDelete = ref(false);
 const isLoadingMain = ref(false);
 
 const getAllPhoto = () =>
-  onFetch({
-    url: `/api/v1/things/${props.initialValues?.uid}/photos`,
+  onFetch(wbvtInstance)({
+    url: `${API_PHOTOS}`,
     method: "GET",
+    data: {
+      filter: {
+        things_id: props.initialValues?.id,
+      },
+    },
     beforeSend: () => null,
     success(response) {
-      photos.value = [...(response.data as IPhotoData[])];
+      photos.value = [...(response.result.data as IPhotoData[])];
     },
     error: () => null,
   });
@@ -81,10 +88,10 @@ const onToggleModal = (value: string) => {
 };
 
 const onDeleteThings = () => {
-  onFetch({
+  onFetch(wbvtInstance)({
     url: `/api/v1/uploads`,
     method: "DELETE",
-    data: { uid: selectedDataThings.value.map((item) => item.uid) },
+    data: { uid: selectedDataThings.value.map((item) => item.id) },
     beforeSend() {
       isLoadingDelete.value = true;
     },
@@ -92,8 +99,7 @@ const onDeleteThings = () => {
       isLoadingDelete.value = false;
       photos.value = [
         ...photos.value.filter(
-          (item) =>
-            !selectedDataThings.value.find((sub) => sub.uid === item.uid)
+          (item) => !selectedDataThings.value.find((sub) => sub.id === item.id)
         ),
       ];
       onToggleModal("things-modal-delete");
@@ -111,10 +117,12 @@ const onMainThings = () => {
   for (const k in dt) {
     formd.append(dt[k].label, dt[k].value as string);
   }
-  onFetch({
-    url: `/api/v1/things/${props.initialValues?.uid}/photos/${selectedDataThings.value[0].uid}`,
+  onFetch(wbvtInstance)({
+    url: `${API_DISPLAY_THINGS}/${props.initialValues?.id}`,
     method: "PUT",
-    data: formd,
+    data: {
+      photo_id: selectedDataThings.value[0].id,
+    },
     beforeSend() {
       isLoadingMain.value = true;
     },
@@ -195,9 +203,9 @@ onMounted(() => {
         class="thumbnail t-parent"
         @mousedown="onMouseDown(item, $event)"
       >
-        <img :src="`/uploads/${item.filename}`" alt="..." />
+        <img :src="`${item.url}`" alt="..." />
         <div
-          v-if="selectedDataThings.find((sub) => sub.uid === item.uid)"
+          v-if="selectedDataThings.find((sub) => sub.id === item.id)"
           class="selected-check"
         >
           <i class="fa-solid fa-check"></i>
@@ -284,7 +292,7 @@ onMounted(() => {
             <span aria-hidden="true">×</span>
           </button>
           <h4 class="modal-title" id="mySmallModalLabel">
-            Delete
+            Make it display photo
             {{
               selectedDataThings.length === 1
                 ? "photo"
@@ -304,7 +312,7 @@ onMounted(() => {
           </button>
           <button
             type="button"
-            class="btn btn-danger"
+            class="btn btn-primary"
             @click="onMainThings()"
             :disabled="isLoadingMain"
           >

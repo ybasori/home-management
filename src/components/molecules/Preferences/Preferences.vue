@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import { expandJSON } from "src/helpers/helpers";
-import { onFetch } from "src/helpers/lazyFetch";
+import { onFetch, onFetchAllAsync } from "src/helpers/lazyFetch";
 import { onMounted, ref, Ref, watch } from "vue";
+import { API_PREFERENCES, API_THINGS } from "src/config/api";
+import { wbvtInstance } from "src/config/axios";
 
 interface IOption {
   label: string;
@@ -18,9 +20,9 @@ interface IOptionWrapper {
 
 interface IInitDataThing {
   name: string;
-  uid: string;
-  parent_uid?: string;
-  prefs: string[];
+  id: string;
+  parent_id?: string;
+  prefs: { id: string; name: string }[];
 }
 
 const props = defineProps<{
@@ -251,28 +253,36 @@ const mySubmitButton: Ref<HTMLButtonElement | null> = ref(null);
 
 const onSubmit = (e: Event) => {
   e.preventDefault();
-  const formd = new FormData();
-  const bd = expandJSON(
-    { ...props.initialValues, ...values.value },
-    {
-      arrayNoNumber: true,
-    }
-  );
-  for (const key in bd) {
-    formd.append(bd[key].label, bd[key].value as string | Blob);
-  }
-  onFetch({
-    url: `/api/v1/things/${props.initialValues?.uid}`,
-    method: "PUT",
-    data: formd,
+  onFetchAllAsync(wbvtInstance)({
+    url: API_PREFERENCES,
+    path: props.initialValues?.prefs.map((item) => item.id),
+    method: "DELETE",
     beforeSend: () => {
       isLoading.value = true;
       emit("setIsLoading", true);
     },
     success: () => {
-      isLoading.value = false;
-      emit("setIsLoading", false);
-      emit("onReload");
+      onFetchAllAsync(wbvtInstance)({
+        url: API_PREFERENCES,
+        method: "POST",
+        data: values.value.prefs.map((item) => ({
+          name: item,
+          things_id: props.initialValues?.id,
+        })),
+        beforeSend: () => {
+          isLoading.value = true;
+          emit("setIsLoading", true);
+        },
+        success: () => {
+          isLoading.value = false;
+          emit("setIsLoading", false);
+          emit("onReload");
+        },
+        error: () => {
+          isLoading.value = false;
+          emit("setIsLoading", false);
+        },
+      });
     },
     error: () => {
       isLoading.value = false;
@@ -348,7 +358,7 @@ watch(
 
 onMounted(() => {
   values.value = {
-    prefs: props?.initialValues?.prefs ?? [],
+    prefs: props?.initialValues?.prefs.map((item) => item.name) ?? [],
   };
 });
 </script>

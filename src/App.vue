@@ -47,7 +47,7 @@ watch(route, () => {
 });
 
 onMounted(() => {
-  toggleFullScreen();
+  // toggleFullScreen();
 });
 </script>
 
@@ -86,7 +86,10 @@ onMounted(() => {
       </button>
     </div>
 
-    <div v-if="kb.show" style="position: fixed; bottom: 0; width: 100%">
+    <div
+      v-if="kb.show"
+      style="position: fixed; left: 0; bottom: 0; width: 100%"
+    >
       <button class="btn btn-default" type="button" @click="kb.setShow(false)">
         hide
       </button>

@@ -5,16 +5,18 @@ import { onMounted, ref, Ref, watch } from "vue";
 import { v4 as uuidV4 } from "uuid";
 import { useMediaDevice } from "src/hooks/useMediaDevice";
 import { RouterLink } from "vue-router";
+import { API_PHOTOS, API_THINGS, API_UPLOAD } from "src/config/api";
+import { wbvtInstance } from "src/config/axios";
 
 interface IInitDataThing {
   name: string;
-  uid: string;
-  parent_uid?: string;
-  prefs: string[];
+  id: string;
+  parent_id?: string;
+  prefs: { id: string; name: string }[];
 }
 interface IPhotoData {
-  uid: string;
-  filename: string;
+  id: string;
+  url: string;
   description: string;
 }
 const props = defineProps<{
@@ -76,8 +78,8 @@ const onUpload = () => {
   for (const key in bd) {
     formd.append(bd[key].label, bd[key].value as string | Blob);
   }
-  onFetch({
-    url: `/api/v1/upload`,
+  onFetch(wbvtInstance)({
+    url: API_UPLOAD,
     method: "POST",
     data: formd,
     beforeSend() {
@@ -87,15 +89,18 @@ const onUpload = () => {
     success(upload) {
       const formupload = new FormData();
       const bd = expandJSON({
-        filename: upload.data,
+        filename: upload.result,
       });
       for (const key in bd) {
         formupload.append(bd[key].label, bd[key].value as string | Blob);
       }
-      onFetch({
-        url: `/api/v1/things/${props.initialValues?.uid}/photos`,
+      onFetch(wbvtInstance)({
+        url: `${API_PHOTOS}`,
         method: "POST",
-        data: formupload,
+        data: {
+          url: upload.result.file_name,
+          things_id: props.initialValues?.id,
+        },
         beforeSend() {
           isLoading.value = true;
           emit("setIsLoading", true);
@@ -103,7 +108,7 @@ const onUpload = () => {
         success(response) {
           isLoading.value = false;
           emit("setIsLoading", false);
-          emit("onReload", response.data as IPhotoData);
+          emit("onReload", response.result as IPhotoData);
           emit("onClose");
         },
         error() {

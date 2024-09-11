@@ -4,22 +4,24 @@ import { onFetch } from "src/helpers/lazyFetch";
 import { useKeyboard } from "src/hooks/useKeyboard";
 import { ref, Ref, watch } from "vue";
 import * as yup from "yup";
+import { API_THINGS } from "src/config/api";
+import { wbvtInstance } from "src/config/axios";
 
 interface IDataThing {
   name: string;
-  uid: string;
-  parent_uid?: string;
-  prefs: string[];
+  id: string;
+  parent_id?: string;
+  prefs: { id: string; name: string }[];
   photo?: {
-    filename: string;
+    url: string;
   };
 }
 interface IInitDataThing {
   name?: string;
-  uid?: string;
-  parent_uid?: string;
+  id?: string;
+  parent_id?: string;
   photo?: {
-    filename: string;
+    url: string;
   };
 }
 
@@ -44,8 +46,8 @@ const validation = () => {
 
 const values: Ref<{
   name: string;
-  uid?: string;
-  parent_uid?: string;
+  id?: string;
+  parent_id?: string;
 }> = ref({ name: "" });
 
 const errValues: Ref<{ [key: string]: string }> = ref({});
@@ -61,19 +63,11 @@ const onReset = () => {
 };
 
 const onSubmit = () => {
-  const formd = new FormData();
-  const bd = expandJSON(values.value);
-  for (const key in bd) {
-    formd.append(bd[key].label, bd[key].value as string | Blob);
-  }
-  if (!!props.initialValues?.parent_uid) {
-    formd.append("parent_uid", props.initialValues.parent_uid);
-  }
   if (props.isEdit) {
-    onFetch({
-      url: `/api/v1/things/${props.initialValues?.uid}`,
+    onFetch(wbvtInstance)({
+      url: `${API_THINGS}/${props.initialValues?.id}`,
       method: "PUT",
-      data: formd,
+      data: values.value,
       beforeSend: () => {
         isLoading.value = true;
         errSubmit.value = null;
@@ -89,10 +83,10 @@ const onSubmit = () => {
       },
     });
   } else {
-    onFetch({
-      url: "/api/v1/things",
+    onFetch(wbvtInstance)({
+      url: API_THINGS,
       method: "POST",
-      data: formd,
+      data: values.value,
       beforeSend: () => {
         isLoading.value = true;
         errSubmit.value = null;
@@ -101,7 +95,7 @@ const onSubmit = () => {
         isLoading.value = false;
         onReset();
         emit("onClose");
-        emit("onReload", data.data as IDataThing);
+        emit("onReload", { ...data.result, prefs: [] } as IDataThing);
       },
       error: () => {
         isLoading.value = false;

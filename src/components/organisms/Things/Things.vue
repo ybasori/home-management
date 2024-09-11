@@ -2,18 +2,21 @@
 import { watch } from "fs";
 import FormThingAddEdit from "src/components/FormThingAddEdit/FormThingAddEdit.vue";
 import { expandJSON } from "src/helpers/helpers";
-import { onFetch } from "src/helpers/lazyFetch";
+import { onFetch, onFetchAllAsync } from "src/helpers/lazyFetch";
 import { onMounted, Ref, ref } from "vue";
 import Properties from "../Properties/Properties.vue";
 import { useMediaDevice } from "src/hooks/useMediaDevice";
 import { useKeyboard } from "src/hooks/useKeyboard";
+import { API_THINGS, API_PREFERENCES, API_PHOTOS } from "src/config/api";
+import { wbvtInstance } from "src/config/axios";
 
 interface IDataThing {
   name: string;
-  uid: string;
-  prefs: string[];
+  id: string;
+  prefs: { id: string; name: string }[];
+  photo_id?: string;
   photo?: {
-    filename: string;
+    url: string;
   };
 }
 
@@ -85,11 +88,11 @@ const onMouseUp = (data: IDataThing) => {
 };
 
 const onDblClick = (data: IDataThing) => {
-  if (data.prefs.find((item) => item === "storage")) {
+  if (data.prefs.map((item) => item.name).find((item) => item === "storage")) {
     selectedDataThings.value = [];
     breadCrumb.value = [...breadCrumb.value, data];
     breadCrumbMove.value = [...breadCrumbMove.value, data];
-    return childFetch(data.uid);
+    return childFetch(data.id);
   } else {
     selectedDataThings.value = [data];
     // onToggleModal("things-option");
@@ -98,10 +101,10 @@ const onDblClick = (data: IDataThing) => {
 };
 
 const onDeleteThings = () => {
-  onFetch({
-    url: `/api/v1/things`,
+  onFetch(wbvtInstance)({
+    url: `${API_THINGS}`,
     method: "DELETE",
-    data: { uid: selectedDataThings.value.map((item) => item.uid) },
+    data: { id: selectedDataThings.value.map((item) => item.id) },
     beforeSend() {
       isLoadingDelete.value = true;
     },
@@ -109,8 +112,7 @@ const onDeleteThings = () => {
       isLoadingDelete.value = false;
       dataThings.value = [
         ...dataThings.value.filter(
-          (item) =>
-            !selectedDataThings.value.find((sub) => sub.uid === item.uid)
+          (item) => !selectedDataThings.value.find((sub) => sub.id === item.id)
         ),
       ];
       onToggleModal("things-modal-delete");
@@ -125,24 +127,78 @@ const onDeleteThings = () => {
   });
 };
 
-const childFetch = (uid: string, menu = "") => {
-  return onFetch({
-    url: `/api/v1/things/${uid}`,
+const childFetch = (id: string, menu = "") => {
+  return onFetch(wbvtInstance)({
+    url: `${API_THINGS}`,
     method: "GET",
+    data: {
+      filter: {
+        parent_id: id,
+      },
+    },
     beforeSend() {
       if (menu === "") {
         isLoading.value = true;
       }
     },
     success(data) {
-      isLoading.value = false;
-      if (menu === "") {
-        dataThings.value = (data as { data: IDataThing[] }).data;
-        dataThingsMove.value = (data as { data: IDataThing[] }).data;
-      }
-      if (menu === "move") {
-        dataThingsMove.value = (data as { data: IDataThing[] }).data;
-      }
+      let ntap = (data as unknown as { result: { data: IDataThing[] } }).result
+        .data;
+      onFetchAllAsync(wbvtInstance)({
+        url: API_PREFERENCES,
+        data: ntap.map((item) => ({
+          filter: {
+            things_id: item.id,
+          },
+        })),
+        beforeSend() {
+          return null;
+        },
+        success(resp) {
+          resp.forEach((item) => {
+            ntap.forEach((sub, i) => {
+              if (sub.id === item.config.params.filter.things_id) {
+                ntap[i].prefs = [...item.data.result.data];
+              }
+            });
+          });
+          onFetchAllAsync(wbvtInstance)({
+            url: API_PHOTOS,
+            path: ntap
+              .filter((item) => item.photo_id !== null)
+              .map((item) => `${item.photo_id}`),
+            beforeSend() {
+              return null;
+            },
+            success(resp) {
+              isLoading.value = false;
+              resp.forEach((item) => {
+                ntap.forEach((sub, i) => {
+                  if (sub.id === item.data.result.things_id) {
+                    ntap[i].photo = {
+                      url: item.data.result.url,
+                    };
+                  }
+                });
+              });
+              if (menu === "") {
+                dataThings.value = ntap;
+                dataThingsMove.value = ntap;
+              }
+              if (menu === "move") {
+                dataThingsMove.value = ntap;
+              }
+            },
+            error() {
+              isLoading.value = false;
+            },
+          });
+        },
+        error() {
+          isLoading.value = false;
+          return null;
+        },
+      });
     },
     error() {
       isLoading.value = false;
@@ -151,25 +207,80 @@ const childFetch = (uid: string, menu = "") => {
 };
 
 const onGetThings = (menu = "") =>
-  onFetch({
-    url: "/api/v1/things",
+  onFetch(wbvtInstance)({
+    url: API_THINGS,
     method: "GET",
+    data: {
+      filter: {
+        parent_id: "null",
+      },
+      sort: [{ by: "created_at", order: "desc" }],
+    },
     beforeSend() {
       if (menu === "") {
         isLoading.value = true;
       }
     },
     success(data) {
-      isLoading.value = false;
-      if (menu === "") {
-        dataThings.value = (data as { data: IDataThing[] }).data;
-        dataThingsMove.value = (data as { data: IDataThing[] }).data;
-      }
-      if (menu === "move") {
-        dataThingsMove.value = (data as { data: IDataThing[] }).data;
-      }
+      let ntap = (data as unknown as { result: { data: IDataThing[] } }).result
+        .data;
+      onFetchAllAsync(wbvtInstance)({
+        url: API_PREFERENCES,
+        data: ntap.map((item) => ({
+          filter: {
+            things_id: item.id,
+          },
+        })),
+        beforeSend() {
+          return null;
+        },
+        success(resp) {
+          resp.forEach((item) => {
+            ntap.forEach((sub, i) => {
+              if (sub.id === item.config.params.filter.things_id) {
+                ntap[i].prefs = [...item.data.result.data];
+              }
+            });
+          });
+
+          onFetchAllAsync(wbvtInstance)({
+            url: API_PHOTOS,
+            path: ntap
+              .filter((item) => item.photo_id !== null)
+              .map((item) => `${item.photo_id}`),
+            beforeSend() {
+              return null;
+            },
+            success(resp) {
+              isLoading.value = false;
+              resp.forEach((item) => {
+                ntap.forEach((sub, i) => {
+                  if (sub.id === item.data.result.things_id) {
+                    ntap[i].photo = {
+                      url: item.data.result.url,
+                    };
+                  }
+                });
+              });
+              if (menu === "") {
+                dataThings.value = ntap;
+                dataThingsMove.value = ntap;
+              }
+              if (menu === "move") {
+                dataThingsMove.value = ntap;
+              }
+            },
+            error() {
+              isLoading.value = false;
+            },
+          });
+        },
+        error() {
+          isLoading.value = false;
+        },
+      });
     },
-    error() {
+    error(err) {
       isLoading.value = false;
     },
   });
@@ -190,20 +301,22 @@ const onMove = (item: IDataThing | null) => {
   if (selectedDataThings.value.length === 1) {
     if (
       (!!item &&
-        selectedDataThings.value[0].uid !== item?.uid &&
-        !!item?.prefs.find((item) => item === "storage")) ||
+        selectedDataThings.value[0].id !== item?.id &&
+        !!item?.prefs
+          .map((item) => item.name)
+          .find((item) => item === "storage")) ||
       !item
     ) {
       const formd = new FormData();
       const bd = expandJSON({
         ...selectedDataThings.value[0],
-        parent_uid: item?.uid ?? null,
+        parent_id: item?.id ?? null,
       });
       for (const key in bd) {
         formd.append(bd[key].label, bd[key].value as string | Blob);
       }
-      onFetch({
-        url: "/api/v1/things/" + selectedDataThings.value[0].uid,
+      onFetch(wbvtInstance)({
+        url: API_THINGS + "/" + selectedDataThings.value[0].id,
         method: "PUT",
         data: formd,
         beforeSend() {
@@ -215,7 +328,7 @@ const onMove = (item: IDataThing | null) => {
 
           dataThings.value = [
             ...dataThings.value.filter(
-              (item) => item.uid !== selectedDataThings.value[0].uid
+              (item) => item.id !== selectedDataThings.value[0].id
             ),
           ];
           onToggleModal("things-modal-move");
@@ -232,12 +345,14 @@ const drop = (ev: DragEvent, item: IDataThing | null) => {
   ev.preventDefault();
   var data = {
     ...JSON.parse(ev.dataTransfer?.getData("text") ?? ""),
-    parent_uid: item?.uid ?? null,
+    parent_id: item?.id ?? null,
   };
   if (
     ((!!item &&
-      data.uid !== item?.uid &&
-      !!item?.prefs.find((item) => item === "storage")) ||
+      data.id !== item?.id &&
+      !!item?.prefs
+        .map((item) => item.name)
+        .find((item) => item === "storage")) ||
       !item) &&
     selectedDataThings.value.length === 1
   ) {
@@ -246,8 +361,8 @@ const drop = (ev: DragEvent, item: IDataThing | null) => {
     for (const key in bd) {
       formd.append(bd[key].label, bd[key].value as string | Blob);
     }
-    onFetch({
-      url: "/api/v1/things/" + data.uid,
+    onFetch(wbvtInstance)({
+      url: API_THINGS + "/" + data.id,
       method: "PUT",
       data: formd,
       beforeSend() {
@@ -258,7 +373,7 @@ const drop = (ev: DragEvent, item: IDataThing | null) => {
         // dataThings.value = (data as { data: IDataThing[] }).data;
 
         dataThings.value = [
-          ...dataThings.value.filter((item) => item.uid !== data.uid),
+          ...dataThings.value.filter((item) => item.id !== data.id),
         ];
       },
       error() {
@@ -283,12 +398,11 @@ const onBreadCrumb = (key: number, menu = "") => {
     breadCrumb.value = breadCrumb.value.filter((_, i) => i <= key);
     breadCrumbMove.value = breadCrumb.value;
     selectedDataThings.value = [];
-    childFetch(breadCrumb.value[key].uid);
+    childFetch(breadCrumb.value[key].id);
   }
   if (menu === "move") {
     breadCrumbMove.value = breadCrumbMove.value.filter((_, i) => i <= key);
-    console.log(breadCrumbMove.value, key);
-    childFetch(breadCrumbMove.value[key].uid, menu);
+    childFetch(breadCrumbMove.value[key].id, menu);
   }
   return;
 };
@@ -314,7 +428,7 @@ const onBreadCrumb = (key: number, menu = "") => {
           v-if="cardAddThings"
           :initialValues="
             breadCrumb.length > 0
-              ? { parent_uid: breadCrumb[breadCrumb.length - 1].uid }
+              ? { parent_id: breadCrumb[breadCrumb.length - 1].id }
               : undefined
           "
           :noActionButton="false"
@@ -368,7 +482,7 @@ const onBreadCrumb = (key: number, menu = "") => {
         @click="
           breadCrumb.length === 0
             ? onGetThings()
-            : childFetch(breadCrumb[breadCrumb.length - 1].uid)
+            : childFetch(breadCrumb[breadCrumb.length - 1].id)
         "
       >
         <i class="fa-solid fa-arrows-rotate"></i>
@@ -418,7 +532,7 @@ const onBreadCrumb = (key: number, menu = "") => {
     >
       <div
         :class="`panel panel-${
-          selectedDataThings.find((sub) => sub.uid === item.uid)
+          selectedDataThings.find((sub) => sub.id === item.id)
             ? 'primary'
             : 'default'
         }`"
@@ -437,11 +551,7 @@ const onBreadCrumb = (key: number, menu = "") => {
             height: 12rem;
           "
         >
-          <img
-            v-if="!!item.photo"
-            :src="`/uploads/${item.photo.filename}`"
-            style="width: 100%"
-          />
+          <img v-if="!!item.photo" :src="item.photo.url" style="width: 100%" />
           <i v-else class="fa-solid fa-circle-info"></i>
         </div>
         <div class="panel-footer">
@@ -607,7 +717,7 @@ const onBreadCrumb = (key: number, menu = "") => {
               if (breadCrumb.length === 0) {
                 onGetThings();
               } else {
-                childFetch(breadCrumb[breadCrumb.length - 1].uid);
+                childFetch(breadCrumb[breadCrumb.length - 1].id);
               }
             }
           "
@@ -677,7 +787,7 @@ const onBreadCrumb = (key: number, menu = "") => {
               if (breadCrumb.length === 0) {
                 onGetThings();
               } else {
-                childFetch(breadCrumb[breadCrumb.length - 1].uid);
+                childFetch(breadCrumb[breadCrumb.length - 1].id);
               }
             }
           "
@@ -719,15 +829,20 @@ const onBreadCrumb = (key: number, menu = "") => {
         </button>
         <button
           v-for="(dt, key) in dataThingsMove
-            .filter((item) => !!item.prefs.find((sbu) => sbu === 'storage'))
-            .filter((item) => item.uid !== selectedDataThings[0].uid)"
+            .filter(
+              (item) =>
+                !!item.prefs
+                  .map((item) => item.name)
+                  .find((sbu) => sbu === 'storage')
+            )
+            .filter((item) => item.id !== selectedDataThings[0].id)"
           type="button"
           class="btn btn-default"
           v-bind:key="key"
           @click="
             () => {
               breadCrumbMove = [...breadCrumbMove, dt];
-              childFetch(dt.uid, 'move');
+              childFetch(dt.id, 'move');
             }
           "
         >

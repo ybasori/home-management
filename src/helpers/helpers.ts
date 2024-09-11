@@ -1,10 +1,13 @@
 interface IConfig {
   arrayNoNumber: boolean;
 }
+type IData = { [key: string]: any };
+type IDataResult = { label: string; value: any };
+
 const onArrayForm = (
   name: string,
-  data: { [key: string]: unknown },
-  obj: { label: string; value: unknown }[],
+  data: IData,
+  obj: IDataResult[],
   config?: IConfig
 ) => {
   let newObj = [...obj];
@@ -18,12 +21,7 @@ const onArrayForm = (
       if (!isNaN(Number(key)) && config?.arrayNoNumber) {
         labelName = `${name}[]`;
       }
-      newObj = onArrayForm(
-        labelName,
-        data[key] as { [key: string]: unknown },
-        newObj,
-        config
-      );
+      newObj = onArrayForm(labelName, data[key] as IData, newObj, config);
     } else {
       let labelName = `${name}[${key}]`;
       if (!isNaN(Number(key)) && config?.arrayNoNumber) {
@@ -35,11 +33,8 @@ const onArrayForm = (
   return newObj;
 };
 
-export const expandJSON = (
-  data: { [key: string]: unknown },
-  config?: IConfig
-) => {
-  let obj: { label: string; value: unknown }[] = [];
+export const expandJSON = (data: IData, config?: IConfig) => {
+  let obj: IDataResult[] = [];
   for (const key in data) {
     if (
       !!data[key] &&
@@ -48,7 +43,7 @@ export const expandJSON = (
     ) {
       obj = onArrayForm(
         `${key}`,
-        data[key] as { [key: string]: unknown },
+        data[key] as { [key: string]: string | Blob },
         obj,
         config
       );
