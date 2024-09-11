@@ -157,7 +157,10 @@ const childFetch = (id: string, menu = "") => {
         success(resp) {
           resp.forEach((item) => {
             ntap.forEach((sub, i) => {
-              if (sub.id === item.config.params.filter.things_id) {
+              if (
+                !!item.data.result &&
+                sub.id === item.config.params.filter.things_id
+              ) {
                 ntap[i].prefs = [...item.data.result.data];
               }
             });
@@ -174,7 +177,10 @@ const childFetch = (id: string, menu = "") => {
               isLoading.value = false;
               resp.forEach((item) => {
                 ntap.forEach((sub, i) => {
-                  if (sub.id === item.data.result.things_id) {
+                  if (
+                    item.data.result !== null &&
+                    sub.id === item.data.result.things_id
+                  ) {
                     ntap[i].photo = {
                       url: item.data.result.url,
                     };
@@ -191,6 +197,13 @@ const childFetch = (id: string, menu = "") => {
             },
             error() {
               isLoading.value = false;
+              if (menu === "") {
+                dataThings.value = ntap;
+                dataThingsMove.value = ntap;
+              }
+              if (menu === "move") {
+                dataThingsMove.value = ntap;
+              }
             },
           });
         },
@@ -255,7 +268,10 @@ const onGetThings = (menu = "") =>
               isLoading.value = false;
               resp.forEach((item) => {
                 ntap.forEach((sub, i) => {
-                  if (sub.id === item.data.result.things_id) {
+                  if (
+                    !!item.data.result &&
+                    sub.id === item.data.result.things_id
+                  ) {
                     ntap[i].photo = {
                       url: item.data.result.url,
                     };
@@ -272,6 +288,13 @@ const onGetThings = (menu = "") =>
             },
             error() {
               isLoading.value = false;
+              if (menu === "") {
+                dataThings.value = ntap;
+                dataThingsMove.value = ntap;
+              }
+              if (menu === "move") {
+                dataThingsMove.value = ntap;
+              }
             },
           });
         },

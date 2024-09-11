@@ -18,6 +18,7 @@ interface IPhotoData {
   id: string;
   url: string;
   description: string;
+  upload_id: string;
 }
 const props = defineProps<{
   initialValues?: IInitDataThing;
@@ -100,6 +101,7 @@ const onUpload = () => {
         data: {
           url: upload.result.file_name,
           things_id: props.initialValues?.id,
+          upload_id: upload.result.id,
         },
         beforeSend() {
           isLoading.value = true;

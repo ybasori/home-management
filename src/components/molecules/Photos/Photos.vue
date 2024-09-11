@@ -17,6 +17,7 @@ interface IInitDataThing {
 }
 interface IPhotoData {
   id: string;
+  upload_id: string;
   url: string;
   description: string;
 }
@@ -89,22 +90,35 @@ const onToggleModal = (value: string) => {
 
 const onDeleteThings = () => {
   onFetch(wbvtInstance)({
-    url: `/api/v1/uploads`,
+    url: `/upload/${selectedDataThings.value[0].upload_id}`,
     method: "DELETE",
-    data: { uid: selectedDataThings.value.map((item) => item.id) },
     beforeSend() {
       isLoadingDelete.value = true;
     },
     success() {
       isLoadingDelete.value = false;
-      photos.value = [
-        ...photos.value.filter(
-          (item) => !selectedDataThings.value.find((sub) => sub.id === item.id)
-        ),
-      ];
-      onToggleModal("things-modal-delete");
-      selectedDataThings.value = [];
-      emit("onReload");
+      onFetch(wbvtInstance)({
+        url: `${API_PHOTOS}/${selectedDataThings.value[0].id}`,
+        method: "DELETE",
+        beforeSend() {
+          isLoadingDelete.value = true;
+        },
+        success() {
+          isLoadingDelete.value = false;
+          photos.value = [
+            ...photos.value.filter(
+              (item) =>
+                !selectedDataThings.value.find((sub) => sub.id === item.id)
+            ),
+          ];
+          onToggleModal("things-modal-delete");
+          selectedDataThings.value = [];
+          emit("onReload");
+        },
+        error() {
+          isLoadingDelete.value = false;
+        },
+      });
     },
     error() {
       isLoadingDelete.value = false;
