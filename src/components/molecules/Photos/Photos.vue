@@ -160,10 +160,9 @@ onMounted(() => {
   <div class="panel panel-default">
     <div class="panel-heading">
       <h4 class="panel-title">
-        <a
+        <span
           role="button"
           data-toggle="collapse"
-          href="javascript:void(0)"
           @click="
             () => {
               onCloseCamera();
@@ -172,7 +171,7 @@ onMounted(() => {
           "
         >
           Add Photo
-        </a>
+        </span>
       </h4>
     </div>
     <div :class="`panel-collapse collapse ${openCard ? 'in' : ''}`">
@@ -212,12 +211,12 @@ onMounted(() => {
   </div>
   <div class="row">
     <div v-for="(item, index) in photos" class="col-xs-4" :key="index">
-      <div
-        href="javascript:void(0)"
-        class="thumbnail t-parent"
-        @mousedown="onMouseDown(item, $event)"
-      >
-        <img :src="`${item.url}`" alt="..." />
+      <div class="thumbnail t-parent" @mousedown="onMouseDown(item, $event)">
+        <img
+          :src="`${item.url}`"
+          alt="..."
+          style="width: 100%; height: 100px; object-fit: cover"
+        />
         <div
           v-if="selectedDataThings.find((sub) => sub.id === item.id)"
           class="selected-check"

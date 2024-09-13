@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
-import { RouterLink, useRoute } from "vue-router";
 import { useMediaDevice } from "./hooks/useMediaDevice";
 import Keyboard from "src/components/atoms/Keyboard/Keyboard.vue";
 import { useKeyboard } from "./hooks/useKeyboard";
 import { Ref } from "vue";
+import { useRoute } from "./hooks/useRoute";
+import Home from "src/pages/Home/Home.vue";
+import Activity from "src/pages/Activity/Activity.vue";
 
 const fullscreen = ref(false);
 const route = useRoute();
@@ -42,9 +44,9 @@ const toggleFullScreen = () => {
   }
 };
 
-watch(route, () => {
-  onCloseCamera();
-});
+// watch(route, () => {
+//   onCloseCamera();
+// });
 
 onMounted(() => {
   // toggleFullScreen();
@@ -63,22 +65,33 @@ onMounted(() => {
       width: 100%;
     "
   >
-    <RouterView />
+    <Home v-if="route.currentRoute === 'things'" />
+    <Activity v-if="route.currentRoute === 'activity'" />
     <div
       style="display: flex; width: 100%; margin-top: auto; margin-bottom: 2rem"
     >
-      <ul class="nav nav-pills nav-justified">
+      <ul class="nav nav-pills nav-justified" style="width: 100%">
         <li
           role="presentation"
-          :class="`${$route.path === '/' ? 'active' : ''}`"
+          :class="`${route.currentRoute === 'things' ? 'active' : ''}`"
+          style="display: table-cell; width: 1%; float: none"
         >
-          <RouterLink to="/">Things</RouterLink>
+          <a
+            style="margin-bottom: 5px; text-align: center"
+            @click="route.setRoute('things')"
+            >Things</a
+          >
         </li>
         <li
           role="presentation"
-          :class="`${$route.path === '/activity' ? 'active' : ''}`"
+          :class="`${route.currentRoute === 'activity' ? 'active' : ''}`"
+          style="display: table-cell; width: 1%; float: none"
         >
-          <RouterLink to="/activity">Activity</RouterLink>
+          <a
+            style="margin-bottom: 5px; text-align: center"
+            @click="route.setRoute('activity')"
+            >Activity</a
+          >
         </li>
       </ul>
       <button class="btn btn-default" @click="onToggleModal('settings')">

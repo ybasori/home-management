@@ -15,4 +15,14 @@ export default defineConfig({
       src: path.resolve(__dirname, "src"),
     },
   },
+  build: {
+    outDir: "./www",
+    rollupOptions: {
+      output: {
+        entryFileNames: `assets/bundle.js`,
+        chunkFileNames: `assets/[name]-[hash].js`,
+        assetFileNames: `assets/[name].[ext]`,
+      },
+    },
+  },
 });

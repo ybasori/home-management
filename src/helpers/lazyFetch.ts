@@ -38,6 +38,10 @@ export const onFetch = (axiosInstance: AxiosInstance) => {
               params: data,
             }
           : { data: type === "json" ? data : form }),
+        headers: {
+          "Content-Type":
+            type === "json" ? "application/json" : "multipart/form-data",
+        },
       });
       success(response.data);
     } catch (err) {

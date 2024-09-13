@@ -67,7 +67,10 @@ const onSubmit = () => {
     onFetch(wbvtInstance)({
       url: `${API_THINGS}/${props.initialValues?.id}`,
       method: "PUT",
-      data: values.value,
+      data: {
+        ...(props.initialValues ?? {}),
+        ...values.value,
+      },
       beforeSend: () => {
         isLoading.value = true;
         errSubmit.value = null;
@@ -86,7 +89,10 @@ const onSubmit = () => {
     onFetch(wbvtInstance)({
       url: API_THINGS,
       method: "POST",
-      data: values.value,
+      data: {
+        ...values.value,
+        parent_id: props.initialValues?.parent_id ?? null,
+      },
       beforeSend: () => {
         isLoading.value = true;
         errSubmit.value = null;

@@ -9,6 +9,7 @@ import { useMediaDevice } from "src/hooks/useMediaDevice";
 import { useKeyboard } from "src/hooks/useKeyboard";
 import { API_THINGS, API_PREFERENCES, API_PHOTOS } from "src/config/api";
 import { wbvtInstance } from "src/config/axios";
+import { onDeleteThings } from "src/helpers/things-helpers";
 
 interface IDataThing {
   name: string;
@@ -100,11 +101,8 @@ const onDblClick = (data: IDataThing) => {
   }
 };
 
-const onDeleteThings = () => {
-  onFetch(wbvtInstance)({
-    url: `${API_THINGS}`,
-    method: "DELETE",
-    data: { id: selectedDataThings.value.map((item) => item.id) },
+const onDelete = () => {
+  onDeleteThings(selectedDataThings.value, {
     beforeSend() {
       isLoadingDelete.value = true;
     },
@@ -125,6 +123,31 @@ const onDeleteThings = () => {
       isLoadingDelete.value = false;
     },
   });
+
+  // onFetch(wbvtInstance)({
+  //   url: `${API_THINGS}`,
+  //   method: "DELETE",
+  //   data: { id: selectedDataThings.value.map((item) => item.id) },
+  //   beforeSend() {
+  //     isLoadingDelete.value = true;
+  //   },
+  //   success() {
+  //     isLoadingDelete.value = false;
+  //     dataThings.value = [
+  //       ...dataThings.value.filter(
+  //         (item) => !selectedDataThings.value.find((sub) => sub.id === item.id)
+  //       ),
+  //     ];
+  //     onToggleModal("things-modal-delete");
+  //     if (isOpenOption.value.find((item) => item === "things-option")) {
+  //       onToggleModal("things-option");
+  //     }
+  //     selectedDataThings.value = [];
+  //   },
+  //   error() {
+  //     isLoadingDelete.value = false;
+  //   },
+  // });
 };
 
 const childFetch = (id: string, menu = "") => {
@@ -252,7 +275,6 @@ const onGetThings = (menu = "") =>
             return null;
           },
           success(resp) {
-            console.log(resp);
             resp.forEach((item) => {
               ntap.forEach((sub, i) => {
                 if (sub.id === item.config.params.filter.things_id) {
@@ -273,7 +295,6 @@ const onGetThings = (menu = "") =>
                 },
                 success(resp) {
                   isLoading.value = false;
-                  console.log(resp);
                   resp.forEach((item) => {
                     ntap.forEach((sub, i) => {
                       if (
@@ -340,18 +361,13 @@ const onMove = (item: IDataThing | null) => {
           .find((item) => item === "storage")) ||
       !item
     ) {
-      const formd = new FormData();
-      const bd = expandJSON({
-        ...selectedDataThings.value[0],
-        parent_id: item?.id ?? null,
-      });
-      for (const key in bd) {
-        formd.append(bd[key].label, bd[key].value as string | Blob);
-      }
       onFetch(wbvtInstance)({
         url: API_THINGS + "/" + selectedDataThings.value[0].id,
         method: "PUT",
-        data: formd,
+        data: {
+          ...selectedDataThings.value[0],
+          parent_id: item?.id ?? null,
+        },
         beforeSend() {
           isLoadingEdit.value = true;
         },
@@ -389,15 +405,10 @@ const drop = (ev: DragEvent, item: IDataThing | null) => {
       !item) &&
     selectedDataThings.value.length === 1
   ) {
-    const formd = new FormData();
-    const bd = expandJSON(data);
-    for (const key in bd) {
-      formd.append(bd[key].label, bd[key].value as string | Blob);
-    }
     onFetch(wbvtInstance)({
       url: API_THINGS + "/" + data.id,
       method: "PUT",
-      data: formd,
+      data: data,
       beforeSend() {
         isLoadingEdit.value = true;
       },
@@ -448,7 +459,6 @@ const onBreadCrumb = (key: number, menu = "") => {
         <a
           role="button"
           data-toggle="collapse"
-          href="javascript:void(0)"
           @click="cardAddThings = !cardAddThings"
         >
           Add Things
@@ -584,11 +594,23 @@ const onBreadCrumb = (key: number, menu = "") => {
             height: 12rem;
           "
         >
-          <img v-if="!!item.photo" :src="item.photo.url" style="width: 100%" />
+          <img
+            v-if="!!item.photo"
+            :src="item.photo.url"
+            style="width: 100%; height: 100%; object-fit: cover"
+          />
           <i v-else class="fa-solid fa-circle-info"></i>
         </div>
         <div class="panel-footer">
-          <h4 class="panel-title">
+          <h4
+            class="panel-title"
+            style="
+              white-space: nowrap;
+              width: 100%;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            "
+          >
             {{ item.name }}
           </h4>
         </div>
@@ -691,7 +713,7 @@ const onBreadCrumb = (key: number, menu = "") => {
           <button
             type="button"
             class="btn btn-danger"
-            @click="onDeleteThings()"
+            @click="onDelete()"
             :disabled="isLoadingDelete"
           >
             <i

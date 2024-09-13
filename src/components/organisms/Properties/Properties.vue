@@ -39,12 +39,10 @@ const onChangeTab = (value: string) => {
         role="presentation"
         :class="activeTab === 'preferences' ? 'active' : ''"
       >
-        <a href="javascript:void(0)" @click="onChangeTab('preferences')"
-          >Preferences</a
-        >
+        <a @click="onChangeTab('preferences')">Preferences</a>
       </li>
       <li role="presentation" :class="activeTab === 'photos' ? 'active' : ''">
-        <a href="javascript:void(0)" @click="onChangeTab('photos')">Photos</a>
+        <a @click="onChangeTab('photos')">Photos</a>
       </li>
     </ul>
     <Preferences

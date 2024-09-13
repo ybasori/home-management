@@ -279,6 +279,10 @@ const onSubmit = (e: Event) => {
               emit("setIsLoading", true);
             },
             success: () => {
+              const n = navigator as unknown as { notification: any };
+              if (!!n.notification) {
+                n.notification.alert("Success!");
+              }
               isLoading.value = false;
               emit("setIsLoading", false);
               emit("onReload");
